@@ -9,12 +9,3 @@ services:
     ports:
       - "8000:8000"
     command: gunicorn app:server --bind 0.0.0.0:8000 --workers=4 --timeout 10
-
-  nginx:
-    container_name: nginx
-    restart: always
-    build: ./nginx
-    ports:
-      - "80:80"
-    depends_on:
-      - dash
