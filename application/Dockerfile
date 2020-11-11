@@ -17,7 +17,3 @@ RUN apk update \
 
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
-
-
-# Finally, run gunicorn.
-# CMD [ "gunicorn", "--workers=5", "--threads=1", "-b 0.0.0.0:8000", "app:server"]
