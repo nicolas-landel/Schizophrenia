@@ -15,9 +15,9 @@ You have to provide the data in the folder "Data".
 
 In the console, the 1st time write the following command:
 
-```docker-compose up --build -d```
+``docker-compose up --build -d``
 
 If you have already done this command and built the images, just write:
-```docker-compose up -d```
+``docker-compose up -d``
 
 Then you can check the local address http://localhost:8000
