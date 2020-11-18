@@ -3,7 +3,7 @@ from copy import deepcopy
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-
+from scipy.spatial import distance
 from plotly.offline import offline
 
 
@@ -464,7 +464,6 @@ def interactive_plot_patient_time(df, df_label_color, list_patients_to_keep, fs_
 
 def interactive_plot_patient_time_3d(list_patients_to_keep, df, df_label, fs_id1=1, fs_id2=2, fs_id3=3,
                                      class_patient=[1, 3, 5], display=True, ):
-
     """
     :param fs_id1:
     :param fs_id2:
@@ -569,7 +568,6 @@ def interactive_plot_patient_time_3d(list_patients_to_keep, df, df_label, fs_id1
 
 def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patients_to_keep,
                                             fs_id1=1, fs_id2=2, fs_id3=3, class_patient=[1, 3, 5], display=True, ):
-
     """
 
     :param list_df: list_table_patients_mca_time
@@ -759,6 +757,114 @@ def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patien
         return fig['data'], fig['layout']
 
 
+# Study MCA
 
 
+def position_vector(df, indice_fs1, indice_fs2):
+    """ This function creates a (list of lists) of the values in the dataframe table_modalities_mca resulting of the MCA :
+    the vector of the coordinates of the modalities in the 2 factors
+    and also the abscissa vector (row of the DF with index (fs, indice_fs1)) and the ordinate vector (fs, indice_fs2)
+
+    and the norm which is a list of the euclidean distance from the origin for each modality of the plan of the factors
+
+    indice_fs1, indice_fs2 are the numbers (int) of the factor of the table you want to select
+
+
+    """
+    vect = []
+    pos_x = []
+    pos_y = []
+    fs = 'Factor'
+
+    table_distance_modalities = pd.DataFrame(columns=df.columns, index=df.index)
+
+    for col in df.columns:
+        vect.append([df.loc[(fs, indice_fs1), [col]][0], df.loc[(fs, indice_fs2), [col]][0]])
+        pos_x.append(df.loc[(fs, indice_fs1), [col]][0])
+        pos_y.append(df.loc[(fs, indice_fs2), [col]][0])
+
+    norm = [math.sqrt(vect[i][0] ** 2 + vect[i][1] ** 2) for i in range(len(vect))]  # euclidean distance
+    max_norm = max(norm)
+    new_norm = [norm_i / max_norm for norm_i in norm]
+    return vect, pos_x, pos_y, new_norm
+
+
+def creation_dataframe_distance_modalities(pos_x, pos_y, fs_id1, fs_id2, table_modalities_mca, table_explained_mca):
+    """ This function creates a dataframe of the distances between each modalities in the plan of the factors
+
+    This returns an upper dataframe
+
+    """
+
+    list_modalities = table_modalities_mca.columns
+    df_modalities_distances = pd.DataFrame(columns=list_modalities, index=list_modalities)  # create empty dataframe
+
+    for j, modality_col in enumerate(df_modalities_distances.columns):
+        for i, modality_row in enumerate(df_modalities_distances.index):
+            # to have an upper triangular matrix
+            if i < j:
+                # select just the modalities significant
+                if abs(table_modalities_mca.iloc[fs_id1 - 1, i]) > math.sqrt(table_explained_mca.loc[fs_id1, 'Zλ']) and \
+                        abs(table_modalities_mca.iloc[fs_id2 - 1, i]) > math.sqrt(
+                    table_explained_mca.loc[fs_id2, 'Zλ']):
+                    df_modalities_distances.loc[modality_row, modality_col] = distance.euclidean((pos_x[j], pos_y[j]),
+                                                                                                 (pos_x[i], pos_y[i]))
+
+    return df_modalities_distances
+
+
+def select_dist_modalities(modality, df_modalities_distances, dist_max, df_data_disj, df_label_disj):
+    modality = tuple(modality)
+
+    df_selected_distances = pd.DataFrame(columns=['modalités', 'distance', 'effectif'])
+    pos_modality = df_modalities_distances.columns.to_list().index(modality)
+    df_bool = df_modalities_distances.isna()
+    df_all_data = pd.concat([df_data_disj, df_label_disj], axis=1)
+
+    for i, modality_test in enumerate(df_modalities_distances.columns):
+        # as it s an upper matrix, we cover vertically then horizontally
+        if i < pos_modality:
+
+            if not df_bool.iloc[i, pos_modality]:
+                dist = df_modalities_distances.iloc[i, pos_modality]
+                if dist <= dist_max:
+                    dic_temp = {'modalités': modality_test[0] + ': ' + modality_test[1],
+                                'distance': round(dist, 2),
+                                'effectif': df_all_data[modality_test].sum(axis=0)}
+
+                    df_selected_distances = df_selected_distances.append(dic_temp, ignore_index=True)
+
+        # we cover horizontally
+        elif i > pos_modality:
+            if not df_bool.iloc[pos_modality, i]:
+                dist = df_modalities_distances.iloc[pos_modality, i]
+                if dist <= dist_max:
+                    dic_temp = {'modalités': modality_test[0] + ': ' + modality_test[1],
+                                'distance': round(dist, 2),
+                                'effectif': df_all_data[modality_test].sum(axis=0)}
+
+                    df_selected_distances = df_selected_distances.append(dic_temp, ignore_index=True)
+
+    return df_selected_distances.sort_values(by=['distance', 'effectif'])
+
+
+def apply_mca_analysis(fs_id1, fs_id2, dist_max, modality, table_modalities_mca, table_explained_mca, df_data_disj,
+                       df_label_disj):
+    """
+    Pipeline of the functions above which allows to create the dataframe of the closest modalities of the modality chosen
+
+    """
+    global df_distances
+    # storing the postion of the modalities in the plan of the factors fs_id1 and fs_id2
+    vect, pos_x, pos_y, new_norm = position_vector(table_modalities_mca, fs_id1, fs_id2)
+
+    # calculating the distances between the significant modalities and storing them in a upper dataframe
+    df_distances = creation_dataframe_distance_modalities(pos_x, pos_y, fs_id1, fs_id2, table_modalities_mca,
+                                                          table_explained_mca)
+
+    # create a dataframe (modality, dist, effective) of the modalities having a
+    #lower distance than dist_max with the modality
+    df_close_modalities = select_dist_modalities(modality, df_distances, dist_max, df_data_disj, df_label_disj)
+
+    return df_close_modalities
 
