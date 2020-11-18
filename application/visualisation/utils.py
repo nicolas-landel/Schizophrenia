@@ -129,3 +129,66 @@ def interactive_plot_variable_by_variable(table, table_explained_mca, fs_id1, fs
         return None
     else:
         return data, layout
+
+
+def interactive_plot_3D_features(fs_id1, fs_id2, fs_id3, table, display=True):  # table is table_modalities_mca
+    """
+    Plot an interactive graph in 3D  of the modalities
+    """
+
+    table_transposed = table.T
+    fs = 'Factor'
+
+    list_name_col_plot = [str(table.columns[i][0]) + ' | ' + str(table.columns[i][1]) for i in
+                          range(len(table.columns))]
+
+    data_col = []
+    data_lab = []
+    coordinates_max = max(max(abs(table.loc[(fs, fs_id1)].values)), max(abs(table.loc[(fs, fs_id2)].values))
+                          , max(abs(table.loc[(fs, fs_id3)].values)))
+
+    for i in range(table.shape[1] - 3):
+        cols_table = go.Scatter3d(x=[table_transposed[('Factor', fs_id1)][i]],
+                                  y=[table_transposed[('Factor', fs_id2)][i]],
+                                  z=[table_transposed[('Factor', fs_id3)][i]],
+                                  hovertext=[list_name_col_plot[i]],
+                                  mode='markers',
+                                  name='variable {}'.format(list_name_col_plot[i]),
+                                  marker=dict(size=10, color="rgba(0,0,255,0.7)"))
+
+        data_col.append(cols_table)
+
+    for j in range(1, 4):  # the last columns of the table are label ('aps de risque', 'a risque', 'psychose')
+        if j == 1:  # psychose
+            color_label = "rgba(255,0,0,0.7)"
+        elif j == 2:  # a risque
+            color_label = 'rgba(200,180,40,0.9)'
+        elif j == 3:  # pas de risque
+            color_label = 'rgba(0,220,0,0.7)'
+        label_table = go.Scatter3d(x=[table_transposed[('Factor', fs_id1)][-j]],
+                                   y=[table_transposed[('Factor', fs_id2)][-j]],
+                                   z=[table_transposed[('Factor', fs_id3)][-j]],
+                                   mode='markers',
+                                   hovertext=[list_name_col_plot[-j]],
+                                   name='{}'.format(list_name_col_plot[-j]),
+                                   marker=dict(size=10, color=color_label))
+
+        data_lab.append(label_table)
+
+    data_ = data_col + data_lab
+
+    layout = go.Layout(title="Variables dans le plan 3D des facteurs plans",
+                       scene=dict(
+                           xaxis={"title": "factor" + str(fs_id1),
+                                  "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+                           yaxis={"title": "factor" + str(fs_id2),
+                                  "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+                           zaxis={"title": "factor" + str(fs_id3),
+                                  "range": [-coordinates_max - 0.1, coordinates_max + 0.1]})
+                       )
+
+    if display:
+        offline.iplot({"data": data_, "layout": layout})
+        return None
+    else:
+        return data_, layout
