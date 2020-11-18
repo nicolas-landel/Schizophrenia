@@ -1,8 +1,10 @@
 import math
+from copy import deepcopy
+import pandas as pd
 
 import plotly.graph_objects as go
 
-# todo table is table_explained_mca
+
 from plotly.offline import offline
 
 
@@ -13,7 +15,7 @@ def prepare_square_plotly(fs_id1, fs_id2, table):
     ie : val_abs(ai)<sqrt(eigenvalue i) ie the position of the modality is superior to the square of the eigenvalue of the axe (far enough of the origin)
 
     """
-
+    # todo table is table_explained_mca
     # todo refactor
     top_line = go.Scatter(x=[-table.loc[fs_id1, 'Zλ'] ** 0.5, table.loc[fs_id1, 'Zλ'] ** 0.5],
                           y=[table.loc[fs_id2, 'Zλ'] ** 0.5, table.loc[fs_id2, 'Zλ'] ** 0.5],
@@ -278,4 +280,83 @@ def interactive_plot_patient_modality(variable, df_var, table_patients_mca, tabl
     else:
         return data_, layout
 
+
+def apply_color_label(df):  # df=df_label
+    """ This function takes an argument the data frame where the label of the patients is stored for each consultation (columns
+    represent every 6 months). The rows represent the patients.
+
+    The color equivalent is added to a copy of this data frame as new columns and for each one of them.
+
+    """
+    df_label_bis = deepcopy(df)  # because otherwise, my dataframe is modified
+    df_label_bis = pd.DataFrame(df_label_bis)
+    list_column_label = df_label_bis.columns.to_list()
+
+    for i, time in enumerate(list_column_label):
+        df_label_bis.loc[df_label_bis[time] == 1, 'color' + str(i)] = 'rgba(0,220,0,0.7)'
+        df_label_bis.loc[df_label_bis[time] == 3, 'color' + str(i)] = 'rgba(235,205,40,0.7)'
+        df_label_bis.loc[df_label_bis[time] == 5, 'color' + str(i)] = 'rgba(250,0,0,0.7)'
+        df_label_bis.loc[df_label_bis[time] == 7, 'color' + str(i)] = 'rgba(120,5,70,0.7)'
+
+    return df_label_bis
+
+
+def interactive_plot_patients(df, df_label, fs_id1=1, fs_id2=2, class_patient=[1, 3, 5], period=0, display=True):
+    """
+    df is table_patients_mca
+    df_label is df label
+
+    This function plots the patients into the plan FS_id1, FS_id2 (factors resulting of the MCA)
+
+    df_label is a serie which references the label (1=not at risk, 3=risk, 5=psychose) for each patient
+
+    period (int) refers to the time of the diagnosis. 0 means for t0, 1 means 6 months, etc. It is linked to the index of
+    the columns in the df_label_time_clear
+
+    period (int, between 0 and 4) is the number of the consultation (0 = T0 ie the first label, 4=T(24mois) ie label_24mois )
+
+    """
+    data_ = []  # data for the plot
+
+    fs = 'Factor'
+    df_label_color = apply_color_label(df_label.iloc[:, period])
+    df_label_copy = pd.DataFrame(df_label_color.iloc[:, period])
+
+    df_color = pd.DataFrame(df_label_color.loc[:, 'color' + str(period)])
+
+    # df_label_copy = pd.concat([df_label_copy, df_color])
+    df_label_copy = df_label_copy.dropna()
+    df_color = df_color.dropna()
+
+    points_x = df.loc[(fs, fs_id1)].values
+    points_y = df.loc[(fs, fs_id2)].values
+    labels = df.columns.values  # index of patient (1,2,3,...)
+
+    coordinates_max = max(max(abs(df.loc[(fs, fs_id1)].values)), max(abs(df.loc[(fs, fs_id2)].values)))
+    for i in df_label_copy.index:
+
+        if df_label_copy.loc[i,][0] in class_patient or str(
+                int(df_label_copy.loc[i][0])) in class_patient:  # in order to select just the patient in a class
+
+            trace = go.Scatter(x=[points_x[i]], y=[points_y[i]], hovertext=str(labels[i]),
+                               mode='markers', name='patient {}'.format(i),
+                               marker=dict(size=10, color=df_color.loc[i, 'color' + str(period)]))
+            data_.append(trace)
+
+    layout = go.Layout(
+        title="Coordonnées des patients projetées dans le plan des facteurs " + str(fs_id1) + ' et ' + str(fs_id2),
+        xaxis={"title": "facteur" + str(fs_id1), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+        yaxis={"title": "facteur" + str(fs_id2), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]})
+
+    fig = go.Figure(data=data_, layout=layout)
+
+    offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
+                 # to save the figure in the repertory
+                 auto_open=False)
+
+    if display:
+        offline.iplot(fig)
+        return None
+    else:
+        return data_, layout
 
