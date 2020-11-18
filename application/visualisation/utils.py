@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-
 from plotly.offline import offline
 
 
@@ -363,7 +362,6 @@ def interactive_plot_patients(df, df_label, fs_id1=1, fs_id2=2, class_patient=[1
 
 def interactive_plot_patient_time(df, df_label_color, list_patients_to_keep, fs_id1=1, fs_id2=2,
                                   class_patient=[1, 3, 5, 7], display=True, ):
-
     """
     This function generates a graph for patients over the time
 
@@ -463,3 +461,107 @@ def interactive_plot_patient_time(df, df_label_color, list_patients_to_keep, fs_
     else:
         return fig['data'], fig['layout']
 
+
+def interactive_plot_patient_time_3d(list_patients_to_keep, df, df_label, fs_id1=1, fs_id2=2, fs_id3=3,
+                                     class_patient=[1, 3, 5], display=True, ):
+
+    """
+    :param fs_id1:
+    :param fs_id2:
+    :param fs_id3:
+    :param df: table_patients_mca
+    :param df_label: df_label
+    :param class_patient:
+    :param display:
+    :param list_patients_to_keep: table_patients_mca.columns.to_list()
+    :return:
+    """
+    df_copy = deepcopy(df)  # deepcopy because some columns may be deleted
+
+    # delete columns (patients) accroding to the list_patients_to_keep
+    list_to_delete = select_list_to_delete_from_list_to_keep(df_copy, list_patients_to_keep)
+    df_copy = df_copy.drop(list_to_delete, axis=1)
+
+    df_label_color = apply_color_label(df_label)
+    fs = 'Factor'
+    points_x = df_copy.loc[(fs, fs_id1)].values
+    points_y = df_copy.loc[(fs, fs_id2)].values
+    points_z = df_copy.loc[(fs, fs_id3)].values
+    labels = df_copy.columns.values
+    coordinates_max = max(max(abs(df.loc[(fs, fs_id1)].values)),
+                          max(abs(df.loc[(fs, fs_id2)].values)),
+                          max(abs(df.loc[(fs, fs_id3)].values)))
+
+    fig = go.Figure()
+    dic_nb_patients = {}
+    for step in np.arange(0, 5):
+
+        df_label_copy = pd.DataFrame(df_label_color.iloc[:, step])
+        df_color = pd.DataFrame(df_label_color.loc[:, 'color' + str(step)])
+        df_label_copy = df_label_copy.dropna()
+        df_color = df_color.dropna()
+        data_ = []
+        dic_nb_patients[step] = 0
+        for i, i_patient in enumerate(df_copy.columns):
+            if df_label_copy.loc[i_patient,][0] in class_patient or str(
+                    int(df_label_copy.loc[i_patient][0])) in class_patient:
+                trace = go.Scatter3d(
+                    visible=False,
+                    mode='markers',
+                    marker=dict(size=10, color=df_color.loc[i_patient, 'color' + str(step)]),
+                    name='patient {}'.format(i_patient),
+                    x=[points_x[i]],
+                    y=[points_y[i]],
+                    z=[points_z[i]],
+                    hovertext=str(labels[i]))
+                fig.add_trace(trace)
+                dic_nb_patients[step] = dic_nb_patients[step] + 1
+
+    # Make 10th trace visible
+    for i in range(dic_nb_patients[0]):
+        fig.data[i].visible = True
+
+    # Create and add slider
+    steps = []
+    p_min = 0  # count the number of patient by time
+    p_max = 0
+    for i in range(5):
+        nb_patients = dic_nb_patients[i]  # nb of points (graphs) for a period of time
+        p_max = p_min + nb_patients
+        step = dict(
+            method="restyle",
+            args=["visible", [False] * len(fig.data)],  # intitialize all to false
+        )
+
+        for j in range(p_min, p_max):
+            step["args"][1][j] = True  # Toggle i'th trace to "visible"
+        steps.append(step)
+        p_min = p_max
+
+    sliders = [dict(
+        active=0,
+        currentvalue={"prefix": "Durée de suivi "},
+        pad={"t": 50},
+        steps=steps
+    )]
+
+    fig.update_layout(
+        sliders=sliders,
+        title="Coordonnées des patients projetés dans le plan 3D des facteurs " + str(fs_id1) + ', ' + str(
+            fs_id2) + ' et ' + str(fs_id3),
+        scene=dict(
+            xaxis={"title": "facteur" + str(fs_id1), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+            yaxis={"title": "facteur" + str(fs_id2), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+            zaxis={"title": "facteur" + str(fs_id3), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]}),
+        height=600
+    )
+
+    offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
+                 # to save the figure in the repertory
+                 auto_open=False)
+
+    if display:
+        offline.iplot(fig)
+        return None
+    else:
+        return fig['data'], fig['layout']
