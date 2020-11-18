@@ -565,3 +565,200 @@ def interactive_plot_patient_time_3d(list_patients_to_keep, df, df_label, fs_id1
         return None
     else:
         return fig['data'], fig['layout']
+
+
+def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patients_to_keep,
+                                            fs_id1=1, fs_id2=2, fs_id3=3, class_patient=[1, 3, 5], display=True, ):
+
+    """
+
+    :param list_df: list_table_patients_mca_time
+    :param df_label_color: df_color_all_lab
+    :param fs_id1:
+    :param fs_id2:
+    :param fs_id3:
+    :param class_patient:
+    :param display:
+    :param list_patients_to_keep: table_patients_mca.columns.to_list()
+    :return:
+    """
+    fs = 'Factor'
+
+    coordinates_max = 0
+    list_points_x = []
+    list_points_y = []
+    list_points_z = []
+
+    list_df_copy = []
+    # cover the list of the df depending on the time to store the coordinates
+    for i, df in enumerate(list_df):
+
+        df_copy = deepcopy(df)  # deepcopy because some columns may be deleted
+
+        # delete columns (patients) accroding to the list_patients_to_keep
+        list_to_delete = select_list_to_delete_from_list_to_keep(df_copy, list_patients_to_keep)
+        # that is quite ugly but it works
+        # it s due to the fact that the list to delete is composed of int and the columns df in the list_df
+        # can be like 5_t1 (for later period)
+        # Todo remove bare except !
+        try:
+            df_copy = df_copy.drop(list_to_delete, axis=1)  # T0
+        except:
+            try:
+                list_to_delete_ = [str(i) + "_t0" for i in list_to_delete]  # useless
+                df_copy = df_copy.drop(list_to_delete_, axis=1)
+
+            except:
+                try:
+                    list_to_delete_ = [str(i) + "_t1" for i in list_to_delete]  # consultation for the 6th month
+                    df_copy = df_copy.drop(list_to_delete_, axis=1)
+                except:
+                    try:
+                        list_to_delete_ = [str(i) + "_t2" for i in list_to_delete]  # consultation for the 12th month
+                        df_copy = df_copy.drop(list_to_delete_, axis=1)
+                    except:
+                        try:
+                            list_to_delete_ = [str(i) + "_t3" for i in
+                                               list_to_delete]  # consultation for the 18th month
+                            df_copy = df_copy.drop(list_to_delete_, axis=1)
+                        except:
+                            try:
+                                list_to_delete_ = [str(i) + "_t4" for i in
+                                                   list_to_delete]  # consultation for the 24th month
+                                df_copy = df_copy.drop(list_to_delete_, axis=1)
+                            except:
+                                print("erreur in the index of the columns")
+        list_df_copy.append(df_copy)
+
+        if i == 0:
+            labels = df_copy.columns.values
+
+        list_points_x.append(df_copy.loc[(fs, fs_id1)].values)
+        list_points_y.append(df_copy.loc[(fs, fs_id2)].values)
+        list_points_z.append(df_copy.loc[(fs, fs_id3)].values)
+        coordinates_max_temp = max(max(abs(df.loc[(fs, fs_id1)].values)),
+                                   max(abs(df.loc[(fs, fs_id2)].values)),
+                                   max(abs(df.loc[(fs, fs_id3)].values)))
+        if coordinates_max_temp > coordinates_max:
+            coordinates_max = coordinates_max_temp
+
+    fig = go.Figure()
+    dic_nb_patients = {}  # nb patients at each period
+
+    #
+    for step in np.arange(0, 5):
+
+        df_label_copy = pd.DataFrame(
+            df_label_color.iloc[:, step])  # select the df_label for the patient at the right step (time)
+        df_color = pd.DataFrame(df_label_color.loc[:, 'color' + str(step)])  # select the color from the df label
+        df_label_copy = df_label_copy.dropna()
+        df_color = df_color.dropna()
+        data_ = []
+        dic_nb_patients[step] = 0
+        points_x = list_points_x[step]
+        points_y = list_points_y[step]
+        points_z = list_points_z[step]
+
+        # cover the index and the patients which are the columns of the df at the
+        # time=step where the patients have been selected
+        for i, i_patient in enumerate(list_df_copy[
+                                          step].columns):
+
+            i_patient = int(str(i_patient).split('_')[0])
+
+            if df_label_copy.loc[i_patient][0] in class_patient or str(
+                    int(df_label_copy.loc[i_patient][0])) in class_patient:
+                # trace the points
+                trace = go.Scatter3d(
+                    visible=False,
+                    mode='markers',
+                    marker=dict(size=10, color=df_color.loc[i_patient, 'color' + str(step)]),
+                    name='patient {}'.format(i_patient),
+                    x=[points_x[i]],
+                    y=[points_y[i]],
+                    z=[points_z[i]],
+                    hovertext=str(labels[i]))
+                fig.add_trace(trace)
+                dic_nb_patients[step] = dic_nb_patients[step] + 1
+                # trace the lines
+                if step >= 1:
+                    points_x_before = list_points_x[step - 1]
+                    points_y_before = list_points_y[step - 1]
+                    points_z_before = list_points_z[step - 1]
+
+                    trace_line = go.Scatter3d(
+                        visible=False,
+                        mode='lines',
+                        name='évolution patient {} entre t{} et t{}'.format(i_patient, str(step - 1), str(step)),
+                        x=[points_x_before[i], points_x[i]],
+                        y=[points_y_before[i], points_y[i]],
+                        z=[points_z_before[i], points_z[i]],
+                        line=dict(color=df_color.loc[i_patient, 'color' + str(step)], width=4),
+                        hovertext='patient {} t{} à t{}'.format(i_patient, str(step - 1), str(step)))
+                    fig.add_trace(trace_line)
+
+    # Make 10th trace visible
+    for i in range(dic_nb_patients[0]):
+        fig.data[i].visible = True
+
+    # Create and add slider
+    steps = []
+    p_min = 0  # count the number of patient by time
+    p_max = 0
+    p_start_line = dic_nb_patients[0]
+    for i in range(5):
+        step = dict(
+            method="restyle",
+            args=["visible", [False] * len(fig.data)],  # intitialize all to false
+        )
+        if i == 0:  # no line to trace
+            nb_patients = dic_nb_patients[i]  # nb of points (graphs) for a period of time
+            p_max = p_min + nb_patients
+            for j in range(p_min, p_max):
+                step["args"][1][j] = True  # Toggle i'th trace to "visible"
+
+        elif i >= 1:
+            nb_patients = dic_nb_patients[i] * 2  # nb of points (graphs) for a period of time
+
+            p_max = p_min + nb_patients
+            for j in range(p_min, p_max):  # all the data of the current period
+                step["args"][1][j] = True  # Toggle i'th trace to "visible"
+
+            for k in range(p_start_line + 1, p_min,
+                           2):  # all the line before, if i==1, no loop, and 2-step to not draw the points
+                step["args"][1][k] = True
+
+        steps.append(step)
+        p_min = p_max
+
+    sliders = [dict(
+        active=0,
+        currentvalue={"prefix": "Durée de suivi "},
+        pad={"t": 50},
+        steps=steps
+    )]
+
+    fig.update_layout(
+        sliders=sliders,
+        title="Patients projected in the factor plan 3D",
+        scene=dict(
+            xaxis={"title": "factor" + str(fs_id1), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+            yaxis={"title": "factor" + str(fs_id2), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+            zaxis={"title": "factor" + str(fs_id3), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]}),
+        height=600
+    )
+
+    offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
+                 # to save the figure in the repertory
+                 auto_open=False)
+
+    if display:
+        offline.iplot(fig)
+        return None
+    else:
+        return fig['data'], fig['layout']
+
+
+
+
+
