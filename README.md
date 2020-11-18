@@ -1,4 +1,4 @@
-# schizophrenia
+# Schizophrenia
 
 This project uses medical data confidential so not available in this repository.
 The aim is to show the code structure and in addition for medical teams providing data respecting the format, to launch the web application.
