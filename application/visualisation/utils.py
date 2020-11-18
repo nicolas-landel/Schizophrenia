@@ -192,3 +192,90 @@ def interactive_plot_3D_features(fs_id1, fs_id2, fs_id3, table, display=True):  
         return None
     else:
         return data_, layout
+
+
+# Patient graphs
+
+
+def select_list_to_delete_from_list_to_keep(df, list_to_keep):
+    """
+    This function is used for the patients' graphs.
+    The user select via the application a list of patient to keep (list_to_keep) and this function returns the opposite patients,
+    those we want to not plot in the graph. The list will be used to delete the columns in the list ldelete in the
+    dataframe table_patients_mca.
+
+    """
+    l_delete = []
+    for i in range(df.shape[1]):
+        if i not in list_to_keep:
+            l_delete.append(i)
+    return l_delete
+
+
+def interactive_plot_patient_modality(variable, df_var, table_patients_mca, table_modalities_mca, df_data,
+                                      fs_id1=1, fs_id2=2, display=True):
+    """
+    This function plots the patients into the plan FS_id1, FS_id2 (factors resulting of the MCA)
+
+    The color depends of the value of the feature you selected
+
+    """
+
+    color_ = ['rgba(235,205,40,0.7)', 'rgba(235,0,180,0.7)', 'rgba(0,255,40,0.7)', 'rgba(25,205,40,0.7)',
+              'rgba(2,205,150,0.7)', 'rgba(235,105,80,0.7)', 'rgba(150,105,80,0.7)', 'rgba(55,105,180,0.7)',
+              'rgba(25,105,230,0.7)', 'rgba(2,105,230,0.7)', 'rgba(5,10,180,0.7)', 'rgba(145,15,180,0.7)',
+              'rgba(75,105,180,0.7)', 'rgba(5,105,0,0.7)', 'rgba(5,5,180,0.7)']
+
+    list_color_pat = [0 for i in range(df_var.shape[0])]
+
+    data_ = []  # data for the plot
+
+    # define color for the patients and create data for the features to plot
+    for j, modality in enumerate(df_var[variable].columns):
+        trace_var = go.Scatter(x=[table_modalities_mca.loc[('Factor', fs_id1), (variable, modality)]],
+                               y=[table_modalities_mca.loc[('Factor', fs_id2), (variable, modality)]],
+                               hovertext=[variable + ': ' + modality],
+                               mode='markers',
+                               name=variable + ': ' + modality,
+                               marker=dict(size=10, color="rgba(0,0,255,0.7)"))
+        data_.append(trace_var)
+        for i in range(df_var.shape[0]):
+            # if df_var[variable].iloc[i,j]==1:
+            if df_var.loc[i, (variable, modality)] == 1:
+                list_color_pat[i] = color_[j]
+
+    fs = 'Factor'
+
+    points_x = table_patients_mca.loc[(fs, fs_id1)].values
+    points_y = table_patients_mca.loc[(fs, fs_id2)].values
+    labels = table_patients_mca.columns.values  # index of patient (1,2,3,...)
+
+    coordinates_max = max(max(abs(table_patients_mca.loc[(fs, fs_id1)].values)),
+                          max(abs(table_patients_mca.loc[(fs, fs_id2)].values)))
+
+    # plot the patients
+    for i in df_var.index:
+        trace = go.Scatter(x=[points_x[i]], y=[points_y[i]], hovertext=str(labels[i]),
+                           mode='markers', name='patient {}, valeur :{} '.format(i, df_data.loc[i, variable]),
+                           marker=dict(size=10, color=list_color_pat[i]))
+        data_.append(trace)
+
+    layout = go.Layout(
+        title="Coordonnées des patients projetées dans le plan des facteurs " + str(fs_id1) + ' et ' + str(
+            fs_id2) + ' pour la variable ' + variable,
+        xaxis={"title": "facteur" + str(fs_id1), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]},
+        yaxis={"title": "facteur" + str(fs_id2), "range": [-coordinates_max - 0.1, coordinates_max + 0.1]})
+
+    fig = go.Figure(data=data_, layout=layout)
+
+    offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
+                 # to save the figure in the repertory
+                 auto_open=False)
+
+    if display:
+        offline.iplot(fig)
+        return None
+    else:
+        return data_, layout
+
+
