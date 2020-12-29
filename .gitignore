@@ -1,5 +1,8 @@
 # PyCharm
 .idea/*
 
+#vscode
+.vscode/
+
 # Data
-data/*
+data/.*
