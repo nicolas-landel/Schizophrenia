@@ -1,0 +1,38 @@
+.app-title {
+    margin-left: 35%;
+    font-size: 50px;
+    margin-bottom: 80px;
+    padding-top: 30px;
+}
+
+#all-the-data {
+    font-family: sans-serif;
+}
+
+.margin-bot-8 {
+    margin-bottom: 8px
+}
+
+.hidden-div {
+    display: none;
+}
+
+.margin-20 {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+
+/*chi2 */
+
+.h2-chi2 {
+    margin-left: 45%;
+    margin-bottom: 8px;
+}
+
+.h6-chi2 {
+    margin-bottom: 30px;
+    margin-top: 50px;
+}
+
+
