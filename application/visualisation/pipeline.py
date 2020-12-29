@@ -1,4 +1,4 @@
-from Schizophrenia.application.visualisation.utils import (
+from .graphs import (
     position_vector,
     creation_dataframe_distance_modalities,
     select_dist_modalities,

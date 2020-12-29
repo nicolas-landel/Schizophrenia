@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from Schizophrenia.application.preprocessing.utils import lower_text_column, word_in_column, creation_col_caarms, \
+from .utils import lower_text_column, word_in_column, creation_col_caarms, \
     select_label, fill_df_time_evolution, select_patient_class_changed, emptyVal, fill_Na_value, \
     creation_dic_matching_names, add_binary_column_to_df
 

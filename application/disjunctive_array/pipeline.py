@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pandas as pd
 
-from Schizophrenia.application.disjunctive_array.utils import creation_disj_df_threshold_split, \
+from .utils import creation_disj_df_threshold_split, \
     creation_disjunctive_array, creation_dic_nb_val_by_col, split_columns, creation_list_variables_repeted, \
     creation_dic_nb_val_by_col_label
 

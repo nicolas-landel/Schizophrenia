@@ -1,4 +1,4 @@
-from Schizophrenia.application.mca.utils import (
+from .utils import (
     apply_mca, apply_mca_df_patient,
     apply_mca_df_modalities,
     apply_mca_df_modalities_contributions,
