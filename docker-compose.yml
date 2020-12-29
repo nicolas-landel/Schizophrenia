@@ -8,4 +8,6 @@ services:
     build: ./application
     ports:
       - "8000:8000"
-    command: gunicorn app:server --bind 0.0.0.0:8000 --workers=4 --timeout 10
+    volumes:
+      - ./application:/code
+    command: python app.py

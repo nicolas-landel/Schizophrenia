@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 # set work directory
 RUN mkdir code
-WORKDIR code
+WORKDIR /code
 
 # copy project to /code
 COPY . .
