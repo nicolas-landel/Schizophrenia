@@ -1,10 +1,11 @@
 import dash_html_components as html
 import dash_core_components as dcc
+import pandas as pd
 
-# from preprocessing.pipeline import pipeline_preprocessing
-# from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
-# from mca.pipeline import pipeline_mca
-# from ml import * # TODO refactor
+from preprocessing import pipeline_preprocessing
+from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
+from mca.pipeline import pipeline_mca
+from ml.utils import split_train_test
 
 import disjunctive_array
 import mca
@@ -22,7 +23,8 @@ class GenerateApp():
     list_moda = [('label', 'psychose')]  #default list_modalities
     period = 4
     test_size = 0.2
-    x_train, y_train, x_test, y_test = split_train_test(df_data_disj, df_label, period, test_size, keep_psychose=True)
+    x_train, y_train, x_test, y_test = pd.DataFrame(), pd.DataFrame(),  pd.DataFrame(),  pd.DataFrame()
+    df_data, df_label, df_data_disj = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
 
     df_data_disj_patients_pred = pd.DataFrame() # pd.DataFrame(0, index=[0], columns=df_data_disj.columns)
