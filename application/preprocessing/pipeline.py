@@ -21,7 +21,7 @@ def pipeline_preprocessing(name_file, option_patients_lost, period):
 
     # load the file
     path = os.getcwd()
-    df = pd.read_csv(path + '/' + name_file)
+    df = pd.read_csv(path + '/data/' + name_file)
 
     # lower text and create new cols for psychiatrique and psychologique
     df = lower_text_column('q40', df)

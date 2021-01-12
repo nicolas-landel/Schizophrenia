@@ -5,5 +5,5 @@
 .vscode/
 
 # Data
-data/.*
-data/raw_data.csv
+application/data/.*
+raw_data.csv
