@@ -951,7 +951,10 @@ class GenerateApp():
     ]
 
     def process_pipelines(self, *args, **kwargs):
-        df_data_disj = pipeline_disjunctive_df_data(df_data)
+        self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
+        print("DF DATA", self.df_data.iloc[10,10])
+        self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
+        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, self.period, self.test_size, keep_psychose=True)
 
 
 # Utils functions
