@@ -21,3 +21,9 @@ If you have already done this command and built the images, just write:
 ``docker-compose up -d``
 
 Then you can check the local address http://localhost:8000
+
+# TODO
+
+- use callbacks for the html in the class and import the utils function in the notebook
+- refactor the html (cf todo in code)
+- process the df for the visualization and for the ML
