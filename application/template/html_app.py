@@ -1,11 +1,13 @@
 import dash_html_components as html
 import dash_core_components as dcc
 import pandas as pd
+from dash.dependencies import Input, Output
 
 from preprocessing import pipeline_preprocessing
 from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
 from mca.pipeline import pipeline_mca
 from ml.utils import split_train_test
+from statistics.chi2 import correlation_revealed, modify_df_label_chi2, chi2_table
 
 import disjunctive_array
 import mca
@@ -32,6 +34,8 @@ class GenerateApp():
     df_label_rf = pd.DataFrame() # deepcopy(df_label)
 
     def __init__(self, *args, **kwargs):
+        print("INIT KWARGS", kwargs)
+        self.app = kwargs.get('app')
 
         self.process_pipelines()
 

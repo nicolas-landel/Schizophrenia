@@ -24,6 +24,8 @@ Then you can check the local address http://localhost:8000
 
 # TODO
 
+- Refactor the functions, comments, process 
+
 - use callbacks for the html in the class and import the utils function in the notebook
 - refactor the html (cf todo in code)
 - process the df for the visualization and for the ML
