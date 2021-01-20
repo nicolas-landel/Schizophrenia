@@ -1,13 +1,15 @@
 import dash_html_components as html
 import dash_core_components as dcc
 import pandas as pd
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import math
 
 from preprocessing import pipeline_preprocessing
 from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
 from process_mca.pipeline import pipeline_mca
 from ml.utils import split_train_test
 from statistics.chi2 import correlation_revealed, modify_df_label_chi2, chi2_table
+from visualisation.graphs import interactive_plot_variable_by_variable
 
 import disjunctive_array
 import mca
