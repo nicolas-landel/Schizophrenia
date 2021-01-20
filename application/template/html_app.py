@@ -99,9 +99,10 @@ class GenerateApp():
                             dcc.RadioItems(
                                 id="chi2_label",
                                 options=[
-                                    {'label':'oui', 'value':True},
-                                    {'label':'non', 'value':False}],
-                                value=False,
+                                    {'label': 'oui', 'value': 1},
+                                    {'label': 'non', 'value': 0}
+                                    ],
+                                value=0,
                                 labelStyle={'display': 'inline-block'}
                             ),
                             html.H6(
