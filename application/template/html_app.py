@@ -19,19 +19,11 @@ import visualisation
 class GenerateApp():
     """
     """
-    html = []
     classes_name_with_psy = ["pas de risque","a risque","psychose"]
     classes_name_without_psy = ["pas de risque","a risque"]
     list_moda = [('label', 'psychose')]  #default list_modalities
     period = 4
     test_size = 0.2
-    x_train, y_train, x_test, y_test = pd.DataFrame(), pd.DataFrame(),  pd.DataFrame(),  pd.DataFrame()
-    df_data, df_label, df_data_disj = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-
-    df_data_disj_patients_pred = pd.DataFrame() # pd.DataFrame(0, index=[0], columns=df_data_disj.columns)
-    df_data_disj_rf = pd.DataFrame() # deepcopy(df_data_disj)
-    df_label_rf = pd.DataFrame() # deepcopy(df_label)
 
     def __init__(self, *args, **kwargs):
         print("INIT KWARGS", kwargs)
