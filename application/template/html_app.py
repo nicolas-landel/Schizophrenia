@@ -9,7 +9,7 @@ from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_di
 from process_mca.pipeline import pipeline_mca
 from ml.utils import split_train_test
 from statistics.chi2 import correlation_revealed, modify_df_label_chi2, chi2_table
-from visualisation.graphs import interactive_plot_variable_by_variable
+from visualisation.graphs import interactive_plot_variable_by_variable, position_vector, creation_dataframe_distance_modalities
 
 import disjunctive_array
 import mca
@@ -207,7 +207,7 @@ class GenerateApp():
 
                                     dcc.Dropdown(
                                         id="modality_to_evaluate",
-                                        value=('label','psychose')  #value by default
+                                        value=('label','psychose') #value by default
                                     ),
                                     html.P(children="Veuillez choisir la distance euclidienne maximum avec les autres modalités"),
 
@@ -893,27 +893,101 @@ class GenerateApp():
         ]
 
         # Callbacks
+
+        # File to process
         self.app.callback(
-            [Output('list of correlation1', 'children'),
-            Output('list of correlation2', 'children'),
-            Output('list of correlation3', 'children')],
-            [Input('threshold_chi2', 'value'),
-            Input('minimum_elements', 'value'),
-            Input('chi2_label', 'value')])(self.display_list_chi2_correlation)
+            Output('hidden_div','children'),
+            [Input('name_file', 'value'),
+            Input('option_lost', 'value')]
+        )(self.choose_patients_lost)
+
+        # Chi2
+        # self.app.callback(
+        #     [Output('list of correlation1', 'children'),
+        #     Output('list of correlation2', 'children'),
+        #     Output('list of correlation3', 'children')],
+        #     [Input('threshold_chi2', 'value'),
+        #     Input('minimum_elements', 'value'),
+        #     Input('chi2_label', 'value')]
+        # )(self.display_list_chi2_correlation)
+    
+        # Intro MCA
+        self.app.callback(
+            Output('effective_modality_display', 'children'),
+            [Input('effective_modality','value'),
+            Input('choose_period_graph', 'value')]
+        )(self.display_modality_effective)
+
+        # Var by var graph
+        self.app.callback(
+            Output('var_by_var', "figure"),
+            [Input('submit-button-state_3', 'n_clicks')],
+            [State("fs_id1_", "value"),
+            State("fs_id2_", "value"),
+            State('choose_period_graph', 'value'),
+            State('significant_only', 'value')]
+        )(self.display_graph_var_by_var)
+
+        # Explication graph var by var
+        self.app.callback(
+            Output("modality_to_evaluate",'options'),
+            [Input("fs_id1_", "value"),
+            Input("fs_id2_", "value")]
+        )(self.display_modalities_options)
+
+        self.app.callback(
+            Output("hidden_div4", 'children'),
+            [Input("fs_id1_", "value"),
+            Input("fs_id2_", "value")]
+        )(self.calculate_df_distance)
+
+    def choose_patients_lost(self, name_file, option_lost):
+        self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
+        return ''
+    
+    def display_modality_effective(self, modality, period):
+        try :
+            modality_ = convert_tring_to_tuple(modality)
+            effective = self.df_data_disj[modality_[0],modality_[1]].sum(axis=0)
+            if effective>1: #patient plurial
+                return('L\'effectif de la modalité {} est de {} patients'.format(str(modality), str(effective)))
+            else:
+                return('L\'effectif de la modalité {} est de {} patient'.format(str(modality), str(effective)))
+        except:
+            return 'Veuillez choisir une modalité'
+    
+    def display_graph_var_by_var(self, n_clicks, fs_id1_, fs_id2_, period_for_var, significant_only):
+        df_var_period = self.list_df_data_disj[period_for_var]
+        data, layout = interactive_plot_variable_by_variable(self.table_modalities_mca, self.table_explained_mca, fs_id1_, fs_id2_,  False, True, significant_only)    
+        return {'data': data,'layout': layout }
+    
+    def display_modalities_options(self, fs_id1, fs_id2):
+        list_modalities = []
+        for i, modality in enumerate(self.table_modalities_mca.columns):
+            if abs(self.table_modalities_mca.loc[('Factor', fs_id1), modality]) > math.sqrt(self.table_explained_mca.loc[fs_id1,'Zλ']) and \
+                abs(self.table_modalities_mca.loc[('Factor', fs_id2), modality]) > math.sqrt(self.table_explained_mca.loc[fs_id2,'Zλ']):
+                list_modalities.append(modality)
+
+        return [{'label': str(i) ,'value': str(i)} for i in list_modalities]  #TODO value (string | number | list of string | numbers; optional)
+
+    def calculate_df_distance(self, fs_id1, fs_id2):
+        vect, pos_x, pos_y, new_norm = position_vector(self.table_modalities_mca, fs_id1, fs_id2)
+        self.df_distances = creation_dataframe_distance_modalities(pos_x, pos_y, fs_id1, fs_id2, self.table_modalities_mca, self.table_explained_mca)        
+        return ''
 
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
         print("DF DATA", self.df_data.iloc[10,10])
         self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
         self.df_label_disj = pipeline_disjunctive_df_label(self.df_label)
-        list_df_data_disj = [self.df_data_disj]*5  # Need to be modify if we really want to take the time evolution into account
+        self.list_df_data_disj = [self.df_data_disj]*5  # Need to be modify if we really want to take the time evolution into account
         (
             self.table_modalities_mca,
             self.table_modalities_mca_contribution,
             self.table_patients_mca,
             self.table_explained_mca,
             self.list_table_patients_mca_time
-         ) = pipeline_mca(list_df_data_disj, 0, self.df_label_disj, nb_factors=10, benzecri=False)
+         ) = pipeline_mca(self.list_df_data_disj, 0, self.df_label_disj, nb_factors=10, benzecri=False)
         self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, self.period, self.test_size, keep_psychose=True)
 
     def display_list_chi2_correlation(self, threshold_chi2, minimum_elements, chi2_label):
@@ -973,4 +1047,10 @@ def generate_table(dataframe, max_rows=130):
          html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
       ]) for i in range(min(len(dataframe), max_rows))]
    )
+
+def convert_tring_to_tuple(string_text):
+    """
+    String_text a string coming from str(tuple_obj)
+    """
+    return string_text.replace('(','').replace(')','').replace('\'','').replace(', ',',').split(',')
 
