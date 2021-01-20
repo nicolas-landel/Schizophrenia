@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 
 from preprocessing import pipeline_preprocessing
 from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
-from mca.pipeline import pipeline_mca
+from process_mca.pipeline import pipeline_mca
 from ml.utils import split_train_test
 from statistics.chi2 import correlation_revealed, modify_df_label_chi2, chi2_table
 

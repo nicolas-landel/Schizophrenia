@@ -1,5 +1,6 @@
 from .utils import (
-    apply_mca, apply_mca_df_patient,
+    apply_mca, 
+    apply_mca_df_patient,
     apply_mca_df_modalities,
     apply_mca_df_modalities_contributions,
     evaluation_mca,
