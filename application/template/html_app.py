@@ -665,276 +665,240 @@ class GenerateApp():
                         ],
                         style={"margin-top":"20px","border-top": "2px solid black"}
                     ),
-                    html.Div(id="Random forest", style={"border-top": "2px solid black"},
-                            children=[
-                                html.H2(children="Random forest", style={"font-family": "Open Sans", "margin-left":"38%",
-                                                                        "margin-top":"20px"}
-                                ),
-                                
-                                html.P(id="explication_rf_all", children=" La forêt aléatoire est une technique d'apprentissage supervisé \
-                                basée sur l'utilisation de nombreux arbres de décision. Chaque arbre prend seulement une partie des données \
-                                pour s'entrainer, différente entre chaque arbre. L'autre partie de données est utilisée pour le tester. Ainsi, \
-                                chaque arbre sera entrainé et testé sur des données différentes. Par ailleurs, chaque arbre a un nombre limité \
-                                de modalités disponibles pour faire les tests de séparation. Il choisira a chaque noeud la meilleure parmi celles à \
-                                disposition. Cela permet de forcer l'utilisation de différentes modalités et de tester différents enchainement de tests. \
-                                "),
-                                html.Div(id="prediction_rf", style={'margin-top':'20px', 'margin-bot':'20px'},
+                    html.Div(id="all of the random forest", 
+                        style={"border-top": "2px solid black"},
+                        children=[
+                            html.Div(id="preprocessing and explanation of random forest",
+                                children=[
+                                    html.H2(children="Random forest", style={"font-family": "Open Sans", "margin-left":"38%", "margin-top":"20px"}),
+                                    html.P(id="explication_rf_all", 
+                                        children=" La forêt aléatoire est une technique d'apprentissage supervisé \
+                                            basée sur l'utilisation de nombreux arbres de décision. Chaque arbre prend seulement une partie des données \
+                                            pour s'entrainer, différente entre chaque arbre. L'autre partie de données est utilisée pour le tester. Ainsi, \
+                                            chaque arbre sera entrainé et testé sur des données différentes. Par ailleurs, chaque arbre a un nombre limité \
+                                            de modalités disponibles pour faire les tests de séparation. Il choisira a chaque noeud la meilleure parmi celles à \
+                                            disposition. Cela permet de forcer l'utilisation de différentes modalités et de tester différents enchainement de tests."
+                                    ),
+                                    html.Div(id="prediction_rf", style={'margin-top':'20px', 'margin-bot':'20px'},
                                         children=[
-                                            html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?'
-                                            ),
-                                            
-                                            dcc.RadioItems(id="keep_patient_aside",
-                                                        options=[{'label':'oui', 'value':True},
-                                                                {'label':'non', 'value':False}],
-                                                        value = True,
-                                                        labelStyle={"display":"inline-block"}
+                                            html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?'),  
+                                            dcc.RadioItems(
+                                                id="keep_patient_aside",
+                                                options=[
+                                                    {'label':'oui', 'value':True},
+                                                    {'label':'non', 'value':False}
+                                                ],
+                                                value = True,
+                                                labelStyle={"display":"inline-block"}
                                             ),
                                             html.Div(id="display_patient_to_choose",
-                                                    children=[
-                                                        html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe"
-                                                        ),
-                                                        dcc.Dropdown(id='patients_to_evaluate',
-                                                                options=[{'label':i, 'value':i} for i in (df_data_disj.index.to_list())],
-                                                                value=None
-                                                                
-                                                        ), 
-                                                        html.Div(id="hidden_div5", style={'display':'none'}
-                                                        )
-                                                        
-                                                        
-                                                    ]
-                                            )
-                                            
-                                            
-                                            ]
-                                ),
-                                
-                                html.P("Choisissez la période d'évaluation :"
-                                ),
-                                dcc.RadioItems(id="period_rf",
-                                            options=[{'label':'M0', 'value':0},
-                                                    {'label':'M6', 'value':1},
-                                                    {'label':'M12', 'value':2},
-                                                    {'label':'M18', 'value':3},
-                                                    {'label':'M24', 'value':4}],
-                                            value=4,
-                                            labelStyle={"display":"inline-block"}
-                                ),
-                                
-                                html.H6(children="Voulez-vous garder les patients diagnostiqués en \"psychose\" de l'étude ?"
-                                ),
-                                
-                                dcc.RadioItems(id="keep_psychose_rf",
-                                            options=[ {'label':'oui', 'value':True},
-                                                        {'label':'non', 'value':False}],
-                                            value=True,
-                                            labelStyle={'display': 'inline-block'}
-                                ),
-                                
-                                html.H6(children="Pourcentage des données utilisées pour la partie test"
-                                ),
-                                
-                                dcc.RadioItems(id="split_size_rf",
-                                            options=[{'label':'10%', 'value':0.1},
-                                                        {'label':'20%', 'value':0.2},
-                                                        {'label':'30%', 'value':0.3}],
-                                            value=0.2,
-                                            labelStyle={"display":"inline-block"}
-                                ),
-                                html.Div(id="hidden_div3", style={"display":"none"}
-                                ),
-                                
-                                html.Div(id="best_param_random_forest", 
-                                        children=[
-                                        html.H4("Calcul des meilleurs paramètres"
-                                        ),
-                                            
-                                        html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):"
-                                        ),
-                                            
-                                        dcc.Input(id='scoring_best_param_random_forest', value='accuracy', type='text'
-                                        ),
-                                        html.P("Voici le meilleur paramétrage :"
-                                        ),    
-                                        html.P(id = "best_param_random_forest_display"
-                                        )
+                                                children=[
+                                                    html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe"),
+                                                    dcc.Dropdown(
+                                                        id='patients_to_evaluate',
+                                                        options=[{'label':i, 'value':i} for i in (df_data_disj.index.to_list())],
+                                                        value=None         
+                                                    ), 
+                                                    html.Div(id="hidden_div5", style={'display':'none'})
+                                                ]
+                                            )                   
                                         ]
-                                ),
-                                
-
-                                html.Div(id="all the parameters of the rf",
-                                    children=[
-                                        
-                                        html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? " 
-                                            ),  
-                                            dcc.RadioItems(
-                                                id="use_best_param",
-                                                options=[{'label':'non', 'value': False},
-                                                        {'label':'oui', 'value': True}],
-                                                value=False,
-                                                labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.P("Choisissez la période d'évaluation :"),
+                                    dcc.RadioItems(
+                                        id="period_rf",
+                                        options=[
+                                            {'label':'M0', 'value':0},
+                                            {'label':'M6', 'value':1},
+                                            {'label':'M12', 'value':2},
+                                            {'label':'M18', 'value':3},
+                                            {'label':'M24', 'value':4}
+                                        ],
+                                        value=4,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.H6(children="Voulez-vous garder les patients diagnostiqués en \"psychose\" de l'étude ?"),
+                                    dcc.RadioItems(
+                                        id="keep_psychose_rf",
+                                        options=[
+                                            {'label':'oui', 'value':True},
+                                            {'label':'non', 'value':False}
+                                        ],
+                                        value=True,
+                                        labelStyle={'display': 'inline-block'}
+                                    ),
+                                    html.H6(children="Pourcentage des données utilisées pour la partie test"),
+                                    dcc.RadioItems(
+                                        id="split_size_rf",
+                                        options=[
+                                            {'label':'10%', 'value':0.1},
+                                            {'label':'20%', 'value':0.2},
+                                            {'label':'30%', 'value':0.3}
+                                        ],
+                                        value=0.2,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.Div(id="hidden_div3", style={"display":"none"}),
+                                    html.Div(id="best_param_random_forest", 
+                                        children=[
+                                            html.H4("Calcul des meilleurs paramètres"),   
+                                            html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):"), 
+                                            dcc.Input(
+                                                id='scoring_best_param_random_forest',
+                                                value='accuracy', 
+                                                type='text'
                                             ),
-
-                                        html.Div(children=[
-                                            html.P("Profondeur maximale de l'arbre :"
-                                            ),
-                                            dcc.RadioItems(
-                                                id='max_depth_rf',
-                                                options=[{'label':i, 'value': i} for i in [2,3,4,'none']],
-                                                value=3,
-                                                labelStyle={"display":"inline-block"}
-                                            ),
-                                            
-                                            html.P("Nombre d'arbres de décision dans la forêt aléatoire :"
-                                            ),
-                                            dcc.RadioItems(
-                                                id='n_estimators',
-                                                options=[{'label':10, 'value': 10},
-                                                        {'label':20, 'value': 20},
-                                                        {'label':50, 'value': 50},
-                                                        {'label':100, 'value': 100}],
-                                                value=50,
-                                                labelStyle={"display":"inline-block"}
-                                            ),
-                                            html.P("Nombre maximal de modalités disponibles pour un arbre :"
-                                            ),
-                                            
-                                            dcc.RadioItems(
-                                                id='max_features_rf',
-                                                options=[{'label':10, 'value': 10},
-                                                        {'label':30, 'value': 30},
-                                                        {'label':50, 'value': 50},
-                                                        {'label':70, 'value': 70},
-                                                        {'label':100, 'value': 100}],
-                                                value=30,
-                                                labelStyle={"display":"inline-block"}
-                                            ),
-                                        
-                                            html.P("Nombre minimum de patients en sortie de noeud "
-                                            ),
-                                            dcc.Slider(
-                                                id='min_samples_split_rf',
-                                                min=2,
-                                                max=10,
-                                                marks={i: 'min_split {}'.format(i) for i in range(2,11)},
-                                                value=5
-                                            ),
-                                            
-                                            html.P("Nombre minimum de patients dans une feuille "
-                                            ), 
-                                            
-                                            dcc.Slider(
-                                                id='min_samples_leaf_rf',
-                                                min=1,
-                                                max=10,
-                                                marks={i: 'min_leaf {}'.format(i) for i in range(1,11)},
-                                                value=5
-                                            ),
-                                            
-                                        
-                                            html.P("Voulez-vous retirer des variables du modèle ? "
-                                            ), 
-                                            dcc.Dropdown(id='delete_col_rf',
-                                                options=[{'label': i, 'value': i} for i in x_train_rf.columns.get_level_values('features').unique().to_list()],
-                                                multi=True,
-                                                value=[]
-                                            ) 
-                                ])           
-                            ]),
-                                
+                                            html.P("Voici le meilleur paramétrage :"),    
+                                            html.P(id = "best_param_random_forest_display")
+                                        ]
+                                    )
+                                ]
+                            ),
+                            html.Div(id="all the parameters of the rf",
+                                children=[
+                                    html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? "),  
+                                    dcc.RadioItems(
+                                        id="use_best_param",
+                                        options=[
+                                            {'label':'non', 'value': False},
+                                            {'label':'oui', 'value': True}
+                                        ],
+                                        value=False,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    # html.Div(children=[
+                                    html.P("Profondeur maximale de l'arbre :"),
+                                    dcc.RadioItems(
+                                        id='max_depth_rf',
+                                        options=[{'label':i, 'value': i} for i in [2,3,4,'none']],
+                                        value=3,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.P("Nombre d'arbres de décision dans la forêt aléatoire :"),
+                                    dcc.RadioItems(
+                                        id='n_estimators',
+                                        options=[
+                                            {'label':10, 'value': 10},
+                                            {'label':20, 'value': 20},
+                                            {'label':50, 'value': 50},
+                                            {'label':100, 'value': 100}
+                                        ],
+                                        value=50,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.P("Nombre maximal de modalités disponibles pour un arbre :"),
+                                    dcc.RadioItems(
+                                        id='max_features_rf',
+                                        options=[
+                                            {'label':10, 'value': 10},
+                                            {'label':30, 'value': 30},
+                                            {'label':50, 'value': 50},
+                                            {'label':70, 'value': 70},
+                                            {'label':100, 'value': 100}
+                                        ],
+                                        value=30,
+                                        labelStyle={"display":"inline-block"}
+                                    ),
+                                    html.P("Nombre minimum de patients en sortie de noeud "),
+                                    dcc.Slider(
+                                        id='min_samples_split_rf',
+                                        min=2,
+                                        max=10,
+                                        marks={i: 'min_split {}'.format(i) for i in range(2,11)},
+                                        value=5
+                                    ),
+                                    html.P("Nombre minimum de patients dans une feuille "), 
+                                    dcc.Slider(
+                                        id='min_samples_leaf_rf',
+                                        min=1,
+                                        max=10,
+                                        marks={i: 'min_leaf {}'.format(i) for i in range(1,11)},
+                                        value=5
+                                    ),
+                                    html.P("Voulez-vous retirer des variables du modèle ? "), 
+                                    dcc.Dropdown(
+                                        id='delete_col_rf',
+                                        options=[{'label': i, 'value': i} for i in x_train_rf.columns.get_level_values('features').unique().to_list()],
+                                        multi=True,
+                                        value=[]
+                                    ) 
+                                ]
+                            ),           
                             html.Div(id='analysis random forest',
-                                    children=[
-                                        html.H2(children="Etude de la forêt aléatoire : test de prédiction ", style={'margin-bottom':"20px"}
-                                        ),
-                                        
-                                        html.H5("Résultats de la prédiction :"
-                                        ),
-                                        dcc.Loading(id="loading-6",
-                                                    type="default",
-                                                    children=  html.P(id="results_prediction_rf", style={"margin-bottom":"15px"})
-                                        
-                                        ),
-                                        
-                                        
-                                        html.H5(id='list_feature_importances_title', children="Importance des variables dans la forêt aléatoire "
-                                        ),
-                                        html.P(id="list_feature_importances"
-                                        ),
-                                
-                                        html.H5(id="confusion matrix rf title", children="Matrice de confusion de la forêt aléatoire"
-                                        ),
-                                
-                                        html.P(id="explication_rf", children="Les lignes de la matrice de confusion représentent les classes\
+                                children=[
+                                    html.H2(children="Etude de la forêt aléatoire : test de prédiction ", style={'margin-bottom':"20px"}),
+                                    html.H5("Résultats de la prédiction :"),
+                                    dcc.Loading(
+                                        id="loading-6",
+                                        type="default",
+                                        children=html.P(id="results_prediction_rf", style={"margin-bottom":"15px"})
+                                    ),
+                                    html.H5(id='list_feature_importances_title', children="Importance des variables dans la forêt aléatoire "),
+                                    html.P(id="list_feature_importances"),
+                                    html.H5(id="confusion matrix rf title", children="Matrice de confusion de la forêt aléatoire"),
+                                    html.P(id="explication_rf", 
+                                        children="Les lignes de la matrice de confusion représentent les classes\
                                             de l'étude et la somme de chaque ligne le nombre d'éléments pour la classe. \
                                             Les colonnes représentent les classes prédites. Idéalement, tous les éléments se retrouvent sur la \
-                                            diagonales : ils ont été prédits dans leur classe.", style={"margin-bottom":"20px"}
-                                        ),
-                                
-                                        html.Div(id="confusion matrix rf",
-                                                style={"display":"grid", "margin-right":"70%","font-size":"20px",
+                                            diagonales : ils ont été prédits dans leur classe.",
+                                        style={"margin-bottom":"20px"}
+                                    ),
+                                    html.Div(id="confusion matrix rf",
+                                        style={"display":"grid", "margin-right":"70%","font-size":"20px",
+                                            "text-align-last": "right","white-space":"pre"},
+                                        children=[
+                                            html.P(id="column_rf", children=["Prédictions"]),
+                                            html.P(id="confu_matrix_rf_1"),
+                                            html.P(id="confu_matrix_rf_2"),
+                                            html.P(id="confu_matrix_rf_3")
+                                        ]
+                                    ),
+                                    html.Div(id="classi_report_rf",
+                                        children=[
+                                            html.H5(id="classification report title", children="Analyse de la forêt aléatoire"),
+                                            html.P(id="explication_classi_rf", children=" explication"),
+                                            html.Div(id="classification report_rf",
+                                                style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                     "text-align-last": "right","white-space":"pre"},
                                                 children=[
-                                                    html.P(id="column_rf", children=["Prédictions"]
-                                                    ),
-                                                    html.P(id="confu_matrix_rf_1"
-                                                    ),
-                                                    html.P(id="confu_matrix_rf_2"
-                                                    ),
-                                                    html.P(id="confu_matrix_rf_3"
-                                                    )
-                                                ]),
-                                        html.Div(id="classi_report_rf",
+                                                    html.P(id="classi_report_rf_1"),
+                                                    html.P(id="classi_report_rf_2"),
+                                                    html.P(id="classi_report_rf_3"),
+                                                    html.P(id="classi_report_rf_4"),
+                                                    html.P(id="classi_report_rf_5"),
+                                                    html.P(id="classi_report_rf_6"),
+                                                    html.P(id="classi_report_rf_7"),
+                                                    html.P(id="classi_report_rf_8"),
+                                                    html.P(id="classi_report_rf_9"),
+                                                    html.P(id="classi_report_rf_10")
+                                                ]
+                                            ),
+                                        ]
+                                    ),
+                                    html.Div(id="multilabel_confusion_matrix_rf",
+                                        children=[
+                                            html.H5(id="mutlilabel title rf", children="Matrice de confusion pour chaque classe"),
+                                            html.P(id="explication_multilab_rf", children=" La matrice de confusion est calculée pour chaque classe."),
+                                            html.Div(id="mutlilabel_confu_mat_rf",
+                                                style={'display':'grid',"margin-right":"70%","font-size":"15px",
+                                                    "text-align-last": "right","white-space":"pre"},
                                                 children=[
-                                                    html.H5(id="classification report title", children="Analyse de la forêt aléatoire"
-                                                    ),
-                                                    html.P(id="explication_classi_rf", children=" explication"
-                                                    ),
-                                                    html.Div(id="classification report_rf",
-                                                            style={'display':'grid',"margin-right":"70%","font-size":"15px",
-                                                                "text-align-last": "right","white-space":"pre"},
-                                                            children=[
-                                                                html.P(id="classi_report_rf_1"),
-                                                                html.P(id="classi_report_rf_2"),
-                                                                html.P(id="classi_report_rf_3"),
-                                                                html.P(id="classi_report_rf_4"),
-                                                                html.P(id="classi_report_rf_5"),
-                                                                html.P(id="classi_report_rf_6"),
-                                                                html.P(id="classi_report_rf_7"),
-                                                                html.P(id="classi_report_rf_8"),
-                                                                html.P(id="classi_report_rf_9"),
-                                                                html.P(id="classi_report_rf_10")
-                                                            ]),
-                                            ]),
-                                        html.Div(id="multilabel_confusion_matrix_rf",
-                                                children=[
-                                                    html.H5(id="mutlilabel title rf", children="Matrice de confusion pour chaque classe"
-                                                    ),
-                                                    html.P(id="explication_multilab_rf", children=" La matrice de confusion est calculée pour chaque \
-                                                    classe."
-                                                    ),
-                                                    html.Div(id="mutlilabel_confu_mat_rf",
-                                                            style={'display':'grid',"margin-right":"70%","font-size":"15px",
-                                                                "text-align-last": "right","white-space":"pre"},
-                                                            children=[
-                                                                html.P(id="multilab_confu_mat_rf_1"),
-                                                                html.P(id="multilab_confu_mat_rf_2"),
-                                                                html.P(id="multilab_confu_mat_rf_3"),
-                                                                html.P(id="multilab_confu_mat_rf_4"),
-                                                                html.P(id="multilab_confu_mat_rf_5"),
-                                                                html.P(id="multilab_confu_mat_rf_6"),
-                                                                html.P(id="multilab_confu_mat_rf_7"),
-                                                                html.P(id="multilab_confu_mat_rf_8")
-
-                                                            ]),
-                                                ])
-
-
-                                ])
-
-                                        
-                                        
-                                    
-                            ])
+                                                    html.P(id="multilab_confu_mat_rf_1"),
+                                                    html.P(id="multilab_confu_mat_rf_2"),
+                                                    html.P(id="multilab_confu_mat_rf_3"),
+                                                    html.P(id="multilab_confu_mat_rf_4"),
+                                                    html.P(id="multilab_confu_mat_rf_5"),
+                                                    html.P(id="multilab_confu_mat_rf_6"),
+                                                    html.P(id="multilab_confu_mat_rf_7"),
+                                                    html.P(id="multilab_confu_mat_rf_8")
+                                                ]
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            )    
+                        ]
+                    )
                 ],
                 style = {"position": "relative", "background-color": "white", "border-radius": "2px 2px 5px 5px",
                         "font-size": "1.5rem", "box-shadow": "rgb(240, 240, 240) 5px 5px 5px 0px",
@@ -943,6 +907,8 @@ class GenerateApp():
                 }
             )   
         ]
+
+        # Callbacks
         self.app.callback(
             [Output('list of correlation1', 'children'),
             Output('list of correlation2', 'children'),
