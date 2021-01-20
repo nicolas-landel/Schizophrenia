@@ -202,13 +202,10 @@ class GenerateApp():
                                                     )
                                                 )                                             
                                             ]
-
-                                    )
+                                        )
                                 ]
                             ),
-                            
-                            html.Div(
-                                id="explanation graphe modalities",
+                            html.Div(id="explanation graphe modalities",
                                 children=[
                                     html.H4(children="Analyse des coordonées des modalités du graphe"),
                                     html.Div(id="hidden_div4", style={"display":"none"}),
@@ -238,9 +235,8 @@ class GenerateApp():
                                         )
                                     )
                                 ]
-                            )
-                            html.Div(
-                                id='analysis factors',
+                            ),
+                            html.Div(id='analysis factors',
                                 style ={'margin-bottom':'20px'},
                                 children=[
                                     html.H3(children="Analyse d'un facteur"),
@@ -300,19 +296,15 @@ class GenerateApp():
                                             html.P(children="Choisissez une variable"),
                                             dcc.Dropdown(
                                                 id="choose_feature",
-                                                options=[{'label':str(i) ,'value':str(i)} for i in df_data.columns],
+                                                options=[{'label':str(i) ,'value':str(i)} for i in self.df_data.columns],
                                                 value='dependance'
                                             ),
-                                            dcc.Graph(id='patients_var', config ={'autosizable' :True, 'responsive':False})
-                                                    
+                                            dcc.Graph(id='patients_var', config ={'autosizable' :True, 'responsive':False})      
                                         ]
                                     )
-                                        
                                 ]
                             ),
-
-                            html.Div(
-                                id="2e graphe ACM",
+                            html.Div(id="2e graphe ACM",
                                 children=[
                                     html.H3(children="Graphe des coordonnées des patients sur le plan des facteurs de l'ACM "),
                                     html.Div(
@@ -346,8 +338,8 @@ class GenerateApp():
                                             html.H6(children="Choississez les patients que vous voulez afficher"),
                                             dcc.Dropdown(
                                                 id='choose_pat_2d',
-                                                options=[{'label':i, 'value':i} for i in range (table_patients_mca.shape[1])],
-                                                value=[i for i in range (table_patients_mca.shape[1])],
+                                                options=[{'label':i, 'value':i} for i in range (self.table_patients_mca.shape[1])],
+                                                value=[i for i in range (self.table_patients_mca.shape[1])],
                                                 multi=True
                                             ),
                                             html.Button(
@@ -367,9 +359,7 @@ class GenerateApp():
                                     )
                                 ]
                             ),
-                            
-                            html.Div(
-                                id="3e graphe ACM : patients 3D",
+                            html.Div(id="3e graphe ACM : patients 3D",
                                 children=[
                                     html.H3(children="Graphe des coordonnées des patients sur le plan en 3D des facteur de l'ACM"),
                                     html.Div(
@@ -408,8 +398,8 @@ class GenerateApp():
                                             ),
                                             dcc.Dropdown(
                                                 id='list_patients_keep_3d',
-                                                options=[{'label':i, 'value':i} for i in range (table_patients_mca.shape[1])],
-                                                value=[i for i in range (table_patients_mca.shape[1])],
+                                                options=[{'label':i, 'value':i} for i in range (self.table_patients_mca.shape[1])],
+                                                value=[i for i in range (self.table_patients_mca.shape[1])],
                                                 multi=True
                                             ),
                                             html.Button(
@@ -581,7 +571,7 @@ class GenerateApp():
                                                     ),
                                                     dcc.Dropdown(
                                                         id='delete_col',
-                                                        options=[{'label': i, 'value': i} for i in x_train.columns.get_level_values('features').unique().to_list()],
+                                                        options=[{'label': i, 'value': i} for i in self.x_train.columns.get_level_values('features').unique().to_list()],
                                                         multi=True,
                                                         value="False"
                                                     ) 
