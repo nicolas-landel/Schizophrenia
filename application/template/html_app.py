@@ -911,6 +911,15 @@ class GenerateApp():
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
         print("DF DATA", self.df_data.iloc[10,10])
         self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
+        self.df_label_disj = pipeline_disjunctive_df_label(self.df_label)
+        list_df_data_disj = [self.df_data_disj]*5  # Need to be modify if we really want to take the time evolution into account
+        (
+            self.table_modalities_mca,
+            self.table_modalities_mca_contribution,
+            self.table_patients_mca,
+            self.table_explained_mca,
+            self.list_table_patients_mca_time
+         ) = pipeline_mca(list_df_data_disj, 0, self.df_label_disj, nb_factors=10, benzecri=False)
         self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, self.period, self.test_size, keep_psychose=True)
 
     def display_list_chi2_correlation(self, threshold_chi2, minimum_elements, chi2_label):
