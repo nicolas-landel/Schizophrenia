@@ -961,6 +961,21 @@ class GenerateApp():
         self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
         self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, self.period, self.test_size, keep_psychose=True)
 
+    def display_list_chi2_correlation(self, threshold_chi2, minimum_elements, chi2_label):
+        print("CALLBACK CHI2")
+        # Process and preprare the dataframes
+        df_label_split = modify_df_label_chi2(self.df_label)
+        df_test_chi2 = pd.concat([self.df_data, df_label_split], axis=1)
+        # Apply chi2 test
+        df_chi2, df_p_chi2 = chi2_table(df_test_chi2)
+        print("CHI2 done", df_chi2.head())
+        threshold_float = float(threshold_chi2)
+        min_el = int(minimum_elements)
+        list_corre = correlation_revealed(df_test_chi2, threshold_float,  min_el, df_p_chi2, chi2_label)
+        str_list_corre_1 = str(list_corre[:len(list_corre)//3]).replace('), (',')\n(')
+        str_list_corre_2 = str(list_corre[len(list_corre)//3:2*len(list_corre)//3]).replace('), (',')\n(')
+        str_list_corre_3 = str(list_corre[2*len(list_corre)//3:]).replace('), (',')\n(')
+        return (str_list_corre_1, str_list_corre_2, str_list_corre_3)
 
 # Utils functions
 
