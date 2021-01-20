@@ -125,7 +125,7 @@ class GenerateApp():
                             html.P(children="Effectif d'une modalité "),
                             dcc.Dropdown(
                                 id="effective_modality",
-                                options=[{'label':str(i) ,'value':i} for i in self.df_data_disj.columns],
+                                options=[{'label':str(i) ,'value': str(i)} for i in self.df_data_disj.columns],
                                 placeholder="Choisissez une modalité"     
                             ),
                             html.P(id='effective_modality_display'),
@@ -174,10 +174,10 @@ class GenerateApp():
                                                 dcc.RadioItems(
                                                     id='significant_only',
                                                     options=[
-                                                        {'label': "oui", 'value': True},
-                                                        {'label':"non", 'value':False}
+                                                        {'label': "oui", 'value': 1},
+                                                        {'label':"non", 'value': 0}
                                                     ],
-                                                    value=False,
+                                                    value=0,
                                                     labelStyle={'display': 'inline-block'}
                                                 ),
                                                 html.Button(
@@ -461,10 +461,10 @@ class GenerateApp():
                                                     dcc.RadioItems(
                                                         id='keep_psychose',
                                                         options=[
-                                                            {'label':'oui', 'value':True},
-                                                            {'label':'non', 'value':False}
+                                                            {'label':'oui', 'value': 1},
+                                                            {'label':'non', 'value': 0}
                                                         ],
-                                                        value=True,
+                                                        value=1,
                                                         labelStyle={'display': 'inline-block'}
                                                     ),
                                                     html.P(id='hidden_div2', style={'display':'none'}),
@@ -512,12 +512,12 @@ class GenerateApp():
                                                             dcc.RadioItems(
                                                                 id='weight_with_psychose',
                                                                 options=[
-                                                                    {'label': "pas de poids", 'value' : {'1': 1,  '3': 1, '5': 1}},
-                                                                    {'label': "classe 'pas de risque' accentuée", 'value' : {'1': 10,  '3': 1, '5': 1}},
-                                                                    {'label': "classe 'a risque' accentuée", 'value' : {'1': 1,  '3': 10, '5': 1}},
-                                                                    {'label': "classe 'psychose' accentuée", 'value' : {'1': 1,  '3': 1, '5': 10}},
+                                                                    {'label': "pas de poids", 'value' : str({'1': 1,  '3': 1, '5': 1})},
+                                                                    {'label': "classe 'pas de risque' accentuée", 'value' : str({'1': 10,  '3': 1, '5': 1})},
+                                                                    {'label': "classe 'a risque' accentuée", 'value' : str({'1': 1,  '3': 10, '5': 1})},
+                                                                    {'label': "classe 'psychose' accentuée", 'value' : str({'1': 1,  '3': 1, '5': 10})},
                                                                 ],
-                                                                value={'1': 1,  '3': 1, '5': 1},
+                                                                value=str({'1': 1,  '3': 1, '5': 1}),
                                                                 labelStyle={"display":"inline-block"}
                                                             )
                                                         ]
@@ -528,11 +528,11 @@ class GenerateApp():
                                                             dcc.RadioItems(
                                                                 id='weight_without_psychose',
                                                                 options=[
-                                                                    {'label': "pas de poids", 'value' : {'1': 1,  '3': 1}},
-                                                                    {'label': "classe 'pas de risque' accentuée", 'value' : {'1': 10,  '3': 1}},
-                                                                    {'label': "classe 'a risque' accentuée", 'value' : {'1': 1,  '3': 10}}
+                                                                    {'label': "pas de poids", 'value' : str({'1': 1,  '3': 1})},
+                                                                    {'label': "classe 'pas de risque' accentuée", 'value' : str({'1': 10,  '3': 1})},
+                                                                    {'label': "classe 'a risque' accentuée", 'value' : str({'1': 1,  '3': 10})}
                                                                 ],
-                                                                value={'1': 1,  '3': 1},
+                                                                value=str({'1': 1,  '3': 1}),
                                                                 labelStyle={"display":"inline-block"}
                                                             )
                                                         ]
@@ -667,10 +667,10 @@ class GenerateApp():
                                             dcc.RadioItems(
                                                 id="keep_patient_aside",
                                                 options=[
-                                                    {'label':'oui', 'value':True},
-                                                    {'label':'non', 'value':False}
+                                                    {'label':'oui', 'value': 1},
+                                                    {'label':'non', 'value': 0}
                                                 ],
-                                                value = True,
+                                                value = 1,
                                                 labelStyle={"display":"inline-block"}
                                             ),
                                             html.Div(id="display_patient_to_choose",
@@ -678,7 +678,7 @@ class GenerateApp():
                                                     html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe"),
                                                     dcc.Dropdown(
                                                         id='patients_to_evaluate',
-                                                        options=[{'label':i, 'value':i} for i in (df_data_disj.index.to_list())],
+                                                        options=[{'label':i, 'value':i} for i in (self.df_data_disj.index.to_list())],
                                                         value=None         
                                                     ), 
                                                     html.Div(id="hidden_div5", style={'display':'none'})
@@ -703,10 +703,10 @@ class GenerateApp():
                                     dcc.RadioItems(
                                         id="keep_psychose_rf",
                                         options=[
-                                            {'label':'oui', 'value':True},
-                                            {'label':'non', 'value':False}
+                                            {'label':'oui', 'value': 1},
+                                            {'label':'non', 'value': 0}
                                         ],
-                                        value=True,
+                                        value=1,
                                         labelStyle={'display': 'inline-block'}
                                     ),
                                     html.H6(children="Pourcentage des données utilisées pour la partie test"),
@@ -742,10 +742,10 @@ class GenerateApp():
                                     dcc.RadioItems(
                                         id="use_best_param",
                                         options=[
-                                            {'label':'non', 'value': False},
-                                            {'label':'oui', 'value': True}
+                                            {'label':'non', 'value': 0},
+                                            {'label':'oui', 'value': 1}
                                         ],
-                                        value=False,
+                                        value=0,
                                         labelStyle={"display":"inline-block"}
                                     ),
                                     # html.Div(children=[
@@ -800,7 +800,7 @@ class GenerateApp():
                                     html.P("Voulez-vous retirer des variables du modèle ? "), 
                                     dcc.Dropdown(
                                         id='delete_col_rf',
-                                        options=[{'label': i, 'value': i} for i in x_train_rf.columns.get_level_values('features').unique().to_list()],
+                                        options=[{'label': i, 'value': i} for i in self.x_train.columns.get_level_values('features').unique().to_list()],
                                         multi=True,
                                         value=[]
                                     ) 
