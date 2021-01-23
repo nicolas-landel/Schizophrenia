@@ -22,7 +22,10 @@ from process_mca.utils import (select_max_positive_contribution_fs,
                                translate_contribution_to_sentence)
 from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_variable_by_variable,
-                                  position_vector, select_dist_modalities)
+                                  position_vector, select_dist_modalities,
+                                  interactive_plot_patient_modality,
+                                  interactive_plot_patient_time,
+                                  interactive_plot_patient_time_follow_3d)
 
 
 class GenerateApp():
@@ -956,15 +959,24 @@ class GenerateApp():
             Input("modality_to_evaluate", 'value')]
         )(self.explanation_graph_modalities)
 
+        # Modalities contribution to the factors
         self.app.callback(
             [Output('modalities_coordo_positive_1', 'children' ),
             Output('modalities_coordo_negative_1', 'children'),
             Output('modalities_contribution_1', 'children'),
             Output('sentence_positive', 'children'),
             Output('sentence_negative', 'children')],
-            [Input('factor_to_analyse','value')
-            ]
+            [Input('factor_to_analyse','value')]
         )(self.display_modalities_factor)
+
+        # Graph pat/feature
+        self.app.callback(
+            Output('patients_var', 'figure'),
+            [Input('factor_abs_graphe_pat_var', 'value'),
+            Input('factor_ordo_graphe_pat_var', 'value'),
+            Input('choose_feature', 'value'),
+            Input('choose_period_graph', 'value')]
+        )(self.create_graph_pat_feature)
 
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
@@ -1032,6 +1044,20 @@ class GenerateApp():
         return (generate_table(df_positive_coordo), generate_table(df_negative_coordo), generate_table(df_contribution),
             sentence_positive, sentence_negative )
 
+    def create_graph_pat_feature(self, fs_1, fs_2, feature, period):
+        """
+        Display the patients on the selected factors, colored according to their belonging to the modalities
+        of the feature
+        """
+        data, layout = interactive_plot_patient_modality(feature,
+                                                        self.df_data_disj,
+                                                        self.list_table_patients_mca_time[period],
+                                                        self.table_modalities_mca,
+                                                        self.df_data,
+                                                        fs_id1=fs_1,
+                                                        fs_id2=fs_2,
+                                                        display=False)
+        return {'data': data,'layout': layout }
 
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)

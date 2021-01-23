@@ -218,7 +218,7 @@ def select_list_to_delete_from_list_to_keep(df, list_to_keep):
     return l_delete
 
 
-def interactive_plot_patient_modality(variable, df_var, table_patients_mca, table_modalities_mca, df_data,
+def interactive_plot_patient_modality(variable, df_var, table_patients_mca, table_modalities_mca, df_data
                                       fs_id1=1, fs_id2=2, display=True):
     """
     This function plots the patients into the plan FS_id1, FS_id2 (factors resulting of the MCA)
@@ -274,9 +274,9 @@ def interactive_plot_patient_modality(variable, df_var, table_patients_mca, tabl
 
     fig = go.Figure(data=data_, layout=layout)
 
-    offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
