@@ -1,22 +1,27 @@
-import dash_html_components as html
-import dash_core_components as dcc
-import pandas as pd
-from dash.dependencies import Input, Output, State
 import math
+import statistics
+from statistics.chi2 import (chi2_table, correlation_revealed,
+                             modify_df_label_chi2)
 
-from preprocessing import pipeline_preprocessing
-from disjunctive_array.pipeline import pipeline_disjunctive_df_data, pipeline_disjunctive_df_label
-from process_mca.pipeline import pipeline_mca
-from ml.utils import split_train_test
-from statistics.chi2 import correlation_revealed, modify_df_label_chi2, chi2_table
-from visualisation.graphs import interactive_plot_variable_by_variable, position_vector, creation_dataframe_distance_modalities
-
+import dash_core_components as dcc
+import dash_html_components as html
 import disjunctive_array
 import mca
-import preprocessing
 import ml
-import statistics
+import pandas as pd
+import preprocessing
 import visualisation
+from dash.dependencies import Input, Output, State
+from disjunctive_array.pipeline import (pipeline_disjunctive_df_data,
+                                        pipeline_disjunctive_df_label)
+from ml.utils import split_train_test
+from preprocessing import pipeline_preprocessing
+from process_mca.pipeline import pipeline_mca
+from visualisation.graphs import (creation_dataframe_distance_modalities,
+                                  interactive_plot_variable_by_variable,
+                                  position_vector,
+                                   select_dist_modalities)
+
 
 class GenerateApp():
     """
@@ -26,6 +31,7 @@ class GenerateApp():
     list_moda = [('label', 'psychose')]  #default list_modalities
     period = 4
     test_size = 0.2
+    df_distances = pd.DataFrame()
 
     def __init__(self, *args, **kwargs):
         print("INIT KWARGS", kwargs)
@@ -941,6 +947,13 @@ class GenerateApp():
             Input("fs_id2_", "value")]
         )(self.calculate_df_distance)
 
+        self.app.callback(
+            [Output('array_graph_moda', 'children'),
+            Output("text_before_array", 'children')],
+            [Input("dist_moda", "value"),
+            Input("modality_to_evaluate", 'value')]
+        )(self.explanation_graph_modalities)
+
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
         return ''
@@ -974,6 +987,23 @@ class GenerateApp():
         vect, pos_x, pos_y, new_norm = position_vector(self.table_modalities_mca, fs_id1, fs_id2)
         self.df_distances = creation_dataframe_distance_modalities(pos_x, pos_y, fs_id1, fs_id2, self.table_modalities_mca, self.table_explained_mca)        
         return ''
+
+    def explanation_graph_modalities(self, dist_moda, modality):
+        dist_moda = dist_moda/10  # The distance was an integer, resize it as decimal
+        if isinstance(modality, str):
+            modality = convert_tring_to_tuple(modality)
+
+        # If df_distances exists
+        if list(self.df_distances.columns):
+            df_closest_moda = select_dist_modalities(modality, self.df_distances, dist_moda, self.df_data_disj, self.df_label_disj)
+    
+            if df_closest_moda.empty:
+                return(['Il n\'y a pas de modalités proches'], ["Voici les modalités dans le rayon de la modalité \"{}: {} \"".format(str(modality[0]),str(modality[1]))])
+            elif df_closest_moda.empty == False:
+                return([generate_table(df_closest_moda)], ["Voici les modalités dans le rayon de la modalité \"{}: {} \"".format(str(modality[0]),str(modality[1]))])
+        else:
+            return "", ""
+
 
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
