@@ -1,7 +1,7 @@
 import math
 import re
 import graphviz
-from IPython.display import SVG
+from IPython.display import SVG  # TODO change
 from IPython.display import display
 from sklearn.metrics import confusion_matrix, classification_report, multilabel_confusion_matrix
 from sklearn.model_selection import GridSearchCV
