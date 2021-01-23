@@ -27,6 +27,7 @@ from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_patient_modality,
                                   interactive_plot_patient_time,
                                   interactive_plot_patient_time_follow_3d)
+from ml.decision_tree import best_param_tree
 
 
 class GenerateApp():
@@ -1004,6 +1005,23 @@ class GenerateApp():
             State("list_patients_keep_3d", "value")]
         )(self.graph_3D_patients)
 
+        # Decision Tree
+        # Period and split
+        self.app.callback(
+            [Output('hidden_div2','children'),
+            Output('div_weight_with_psychose', 'style'),
+            Output('div_weight_without_psychose', 'style')],
+            [Input('choose_period_decision_tree', 'value'),
+            Input('split_size', 'value'),
+            Input('keep_psychose', 'value')]
+        )(self.split_data_decision_tree)
+
+        # Best parameters tree
+        self.app.callback(
+            Output('best_para_tree', 'children'),
+            [Input('scoring_best_para', 'value')]
+        )(self.best_para_tree)
+
 
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
@@ -1113,6 +1131,17 @@ class GenerateApp():
         contri_val_x_, contri_col_x_ = select_max_negative_contribution_fs(self.table_modalities_mca, fs_id1_p_3D, 5,'coordonnées')
 
         return {'data': data,'layout': layout }, str(contri_col_x), str(contri_col_x_)
+
+    def split_data_decision_tree(self, choose_period_decision_tree, split_size, keep_psychose):
+        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, choose_period_decision_tree, split_size, keep_psychose)
+        if keep_psychose == True:
+            return ('', {'margin_bottom':'20px'}, {'display':'none'})
+        elif keep_psychose == False:
+            return ('',  {'display':'none'}, {'margin_bottom':'20px'})
+    
+    def best_para_tree(self, scoring_best_para):
+        best_score, grid_score = best_param_tree(scoring_best_para, 5, self.x_train, self.y_train)
+        return str(best_score)
 
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
