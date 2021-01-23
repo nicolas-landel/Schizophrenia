@@ -17,10 +17,12 @@ from disjunctive_array.pipeline import (pipeline_disjunctive_df_data,
 from ml.utils import split_train_test
 from preprocessing import pipeline_preprocessing
 from process_mca.pipeline import pipeline_mca
+from process_mca.utils import (select_max_positive_contribution_fs,
+                               select_max_negative_contribution_fs,
+                               translate_contribution_to_sentence)
 from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_variable_by_variable,
-                                  position_vector,
-                                   select_dist_modalities)
+                                  position_vector, select_dist_modalities)
 
 
 class GenerateApp():
@@ -954,6 +956,16 @@ class GenerateApp():
             Input("modality_to_evaluate", 'value')]
         )(self.explanation_graph_modalities)
 
+        self.app.callback(
+            [Output('modalities_coordo_positive_1', 'children' ),
+            Output('modalities_coordo_negative_1', 'children'),
+            Output('modalities_contribution_1', 'children'),
+            Output('sentence_positive', 'children'),
+            Output('sentence_negative', 'children')],
+            [Input('factor_to_analyse','value')
+            ]
+        )(self.display_modalities_factor)
+
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
         return ''
@@ -989,6 +1001,9 @@ class GenerateApp():
         return ''
 
     def explanation_graph_modalities(self, dist_moda, modality):
+        """
+        Display the modalities in the ACM graph which have a distance lower than dist_moda with the modality 
+        """
         dist_moda = dist_moda/10  # The distance was an integer, resize it as decimal
         if isinstance(modality, str):
             modality = convert_tring_to_tuple(modality)
@@ -1003,6 +1018,19 @@ class GenerateApp():
                 return([generate_table(df_closest_moda)], ["Voici les modalités dans le rayon de la modalité \"{}: {} \"".format(str(modality[0]),str(modality[1]))])
         else:
             return "", ""
+
+    def display_modalities_factor(self, factor_to_analyse):
+        """
+        Analyse a factor of the ACM, listing the modalities which contribute the max positively and negatively
+        and the absolute contribution
+        """
+        df_positive_coordo = select_max_positive_contribution_fs(self.table_modalities_mca, factor_to_analyse, 5, 'coordonnées')
+        df_negative_coordo = select_max_negative_contribution_fs(self.table_modalities_mca, factor_to_analyse, 5, 'coordonnées')
+        df_contribution = select_max_positive_contribution_fs(self.table_modalities_mca_contribution, factor_to_analyse, 10, 'contribution x1000')
+        
+        sentence_positive, sentence_negative = translate_contribution_to_sentence(df_contribution, self.table_modalities_mca, factor_to_analyse)
+        return (generate_table(df_positive_coordo), generate_table(df_negative_coordo), generate_table(df_contribution),
+            sentence_positive, sentence_negative )
 
 
     def process_pipelines(self, *args, **kwargs):
