@@ -22,6 +22,7 @@ from process_mca.utils import (select_max_positive_contribution_fs,
                                translate_contribution_to_sentence)
 from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_variable_by_variable,
+                                  apply_color_label,
                                   position_vector, select_dist_modalities,
                                   interactive_plot_patient_modality,
                                   interactive_plot_patient_time,
@@ -969,7 +970,7 @@ class GenerateApp():
             [Input('factor_to_analyse','value')]
         )(self.display_modalities_factor)
 
-        # Graph pat/feature
+        # Graph patient/feature
         self.app.callback(
             Output('patients_var', 'figure'),
             [Input('factor_abs_graphe_pat_var', 'value'),
@@ -977,6 +978,18 @@ class GenerateApp():
             Input('choose_feature', 'value'),
             Input('choose_period_graph', 'value')]
         )(self.create_graph_pat_feature)
+
+        # Graph patients 2D
+        self.app.callback(
+            Output('patients_2d', "figure"),
+            [Input('submit-button-state_1', 'n_clicks')],
+
+            [State("fs_id1_p", "value"),
+            State("fs_id2_p", "value"),
+            State("class_patient_2D","value"),
+            State("choose_pat_2d","value")]
+        )(self.display_graph_patients)
+
 
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
@@ -1059,9 +1072,23 @@ class GenerateApp():
                                                         display=False)
         return {'data': data,'layout': layout }
 
+    def display_graph_patients(self, n_clicks,fs_id1_p, fs_id2_p, class_patient_2D, choose_pat_2d):
+        """
+        Graph of the patients in the MCA factor plan, colored depending on their label
+        """
+        data, layout = interactive_plot_patient_time(df=self.table_patients_mca,
+                                                    fs_id1=fs_id1_p,
+                                                    fs_id2=fs_id2_p,
+                                                    df_label_color=self.df_color_all_lab,
+                                                    class_patient=class_patient_2D,
+                                                    display=False,
+                                                    list_patients_to_keep=choose_pat_2d)
+        return {'data': data,'layout': layout }
+
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
         print("DF DATA", self.df_data.iloc[10,10])
+        self.df_color_all_lab = apply_color_label(self.df_label)
         self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
         self.df_label_disj = pipeline_disjunctive_df_label(self.df_label)
         self.list_df_data_disj = [self.df_data_disj]*5  # Need to be modify if we really want to take the time evolution into account
