@@ -979,7 +979,7 @@ class GenerateApp():
             Input('choose_period_graph', 'value')]
         )(self.create_graph_pat_feature)
 
-        # Graph patients 2D
+        # Patients 2D graph
         self.app.callback(
             Output('patients_2d', "figure"),
             [Input('submit-button-state_1', 'n_clicks')],
@@ -989,6 +989,20 @@ class GenerateApp():
             State("class_patient_2D","value"),
             State("choose_pat_2d","value")]
         )(self.display_graph_patients)
+
+        # Patients 3D graph
+        self.app.callback(
+            [Output('patients_3D', "figure"),
+            Output('contributions_fs_x','children'),
+            Output('contributions_fs_x_','children')
+            ],
+            [Input('submit-button-state_2', 'n_clicks')],
+            [State("fs_id1_p_3D", "value"),
+            State("fs_id2_p_3D", "value"),
+            State("fs_id3_p_3D", "value"),
+            State("class_patient_3D", "value"),
+            State("list_patients_keep_3d", "value")]
+        )(self.graph_3D_patients)
 
 
     def choose_patients_lost(self, name_file, option_lost):
@@ -1084,6 +1098,21 @@ class GenerateApp():
                                                     display=False,
                                                     list_patients_to_keep=choose_pat_2d)
         return {'data': data,'layout': layout }
+    
+    def graph_3D_patients(self, n_clicks_2, fs_id1_p_3D, fs_id2_p_3D, fs_id3_p_3D, class_patient_3D, list_patients_keep_3d):
+        data, layout = interactive_plot_patient_time_follow_3d(list_df=self.list_table_patients_mca_time, 
+                                                               df_label_color=self.df_color_all_lab, 
+                                                               fs_id1=fs_id1_p_3D,
+                                                               fs_id2=fs_id2_p_3D,
+                                                               fs_id3=fs_id3_p_3D,
+                                                               class_patient=class_patient_3D,
+                                                               display=False,
+                                                               list_patients_to_keep=list_patients_keep_3d)
+        
+        contri_val_x, contri_col_x = select_max_positive_contribution_fs(self.table_modalities_mca, fs_id1_p_3D, 5, 'coordonnées')  #reprendre la table affichée
+        contri_val_x_, contri_col_x_ = select_max_negative_contribution_fs(self.table_modalities_mca, fs_id1_p_3D, 5,'coordonnées')
+
+        return {'data': data,'layout': layout }, str(contri_col_x), str(contri_col_x_)
 
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)

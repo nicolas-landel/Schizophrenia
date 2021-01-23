@@ -751,9 +751,9 @@ def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patien
         height=600
     )
 
-    offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
