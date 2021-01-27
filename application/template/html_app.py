@@ -965,16 +965,26 @@ class GenerateApp():
             State("list_patients_keep_3d", "value")]
         )(self.graph_3D_patients)
 
-        # Decision Tree
-        # Period and split
+        # Machine learning
+
+        # Create train and test data for ML tasks
         self.app.callback(
-            [Output('hidden_div2','children'),
+            Output('display_patient_to_choose','style'),
+            [Input('keep_patient_aside','value')]
+        )(self.put_pat_aside)
+
+        self.app.callback(
+            [Output('hidden_div5', 'children'),
+            Output('hidden_div2','children'),
             Output('div_weight_with_psychose', 'style'),
             Output('div_weight_without_psychose', 'style')],
-            [Input('choose_period_decision_tree', 'value'),
+            [Input('patients_to_evaluate', 'value'),
+            Input('choose_period_decision_tree', 'value'),
             Input('split_size', 'value'),
             Input('keep_psychose', 'value')]
-        )(self.split_data_decision_tree)
+        )(self.update_data)
+
+        # Decision Tree
 
         # Best parameters tree
         self.app.callback(
@@ -1016,9 +1026,16 @@ class GenerateApp():
                 Input('weight_without_psychose','value'),
                 Input('delete_col','value'),
                 Input('keep_psychose', 'value'),
-                Input("choose_period_decision_tree", 'value')
+                Input('choose_period_decision_tree', 'value'),
+                Input('patients_to_evaluate', 'value'),
+                Input('split_size', 'value'),
                 ]
         )(self.update_graph)
+
+        # Random forest
+
+
+
 
 
     def choose_patients_lost(self, name_file, option_lost):
@@ -1130,23 +1147,58 @@ class GenerateApp():
 
         return {'data': data,'layout': layout }, str(contri_col_x), str(contri_col_x_)
 
-    def split_data_decision_tree(self, choose_period_decision_tree, split_size, keep_psychose):
-        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, choose_period_decision_tree, split_size, keep_psychose)
-        if keep_psychose == True:
-            return ('', {'margin_bottom':'20px'}, {'display':'none'})
-        elif keep_psychose == False:
-            return ('',  {'display':'none'}, {'margin_bottom':'20px'})
+    def put_pat_aside (self, keep_pat_aside):
+            if keep_pat_aside==False:
+                return({'display':'none'} )
+            else:
+                return {'margin-top':'10px'} 
+
+    def update_data (self, patient, choose_period_decision_tree, split_size, keep_psychose):
+        """
+        Create 2 dataframes for the machine learning tasks, df_data_disj_ml and df_label_ml, copies of f_data_disj and df_label.
+        These copies are split into x_train, y_train, x_test, y_test later for the ml tasks.
+        This allows us to keep the integrity of the df_data_disj as we can drop some rows.
+
+        It also removes a row corresponding to the id "patient" in the data. This is used to isolate a patient from the training and later
+        test a prediction on it.
+        """
+        self.df_patient_pred = pd.DataFrame(0, index=[0], columns=self.df_data_disj.columns)
+        self.df_patient_pred_label = pd.DataFrame()
+        self.df_data_disj_ml = deepcopy(self.df_data_disj)
+        self.df_label_ml = deepcopy(self.df_label)
+        
+        if patient:
+            patient = int(patient)
+            # Pick the patient to keep aside for prediction in another dataframe
+            self.df_patient_pred = self.df_patient_pred.append(self.df_data_disj_ml.loc[patient])
+            self.df_data_disj_ml = self.df_data_disj_ml.drop([patient], axis=0)
+            self.df_data_disj_ml.index = [i for i in range (self.df_data_disj_ml.shape[0])]  # Re-index
+            # Same for the label
+            self.df_patient_pred_label = self.df_patient_pred_label.append(self.df_label_ml.loc[patient])
+            self.df_label_ml = self.df_label_ml.drop([patient], axis=0)
+            self.df_label_ml.index = [i for i in range (self.df_label_ml.shape[0])]  # Re-index
+
+        # Re process the split in case the rows were modified (one patient removed)    
+        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj_ml,
+                                                                                self.df_label_ml,
+                                                                                choose_period_decision_tree,
+                                                                                split_size,
+                                                                                keep_psychose)
+        if keep_psychose:
+            return '', '', {'margin_bottom':'20px'}, {'display':'none'}
+        else:
+            return '', '',  {'display':'none'}, {'margin_bottom':'20px'}
     
     def best_para_tree(self, scoring_best_para):
         best_score, grid_score = best_param_tree(scoring_best_para, 5, self.x_train, self.y_train)
         return str(best_score)
 
     def update_graph(self, depth_, min_split_, min_leaf_, weight_with_psychose,
-                 weight_without_psychose, delete_col, keep_psychose, choose_period_decision_tree):
+                 weight_without_psychose, delete_col, keep_psychose, choose_period_decision_tree, patient_removed, split_size):
         """
-        """
-        # x_train, y_train, x_test, y_test = split_train_test(df_data_disj, df_label, choose_period_decision_tree, 0.2, keep_psychose)
         
+        """
+        # TODO refactor
 
         if keep_psychose == True:  #if the patients 'psychose' are still in the study, the weight with them needs to be used
             if isinstance(weight_with_psychose, str) and weight_with_psychose[0] =="{":
@@ -1198,7 +1250,7 @@ class GenerateApp():
             confu_mat_ok = processing_matrix_format(confu_matrix, self.classes_name_without_psy, confu_matrix=True, multilabel_confu_m=False)  #foramtting the confusion matrix
             multi_confu_mat = processing_matrix_format(multilab_confu_mat, self.classes_name_without_psy, confu_matrix=False, multilabel_confu_m=True)
 
-            encoded_image = base64.b64encode(open('.ml/images/decision_tree_modified.png', 'rb').read())
+            encoded_image = base64.b64encode(open('./ml/images/decision_tree_modified.png', 'rb').read())
             classi_report = str(classi_report).split('\n')
     
             classi_rep_1, classi_rep_2, classi_rep_3, classi_rep_4, classi_rep_5 = classi_report[0],classi_report[1], classi_report[2], classi_report[3], classi_report[4] 
