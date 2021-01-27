@@ -24,7 +24,8 @@ from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_patient_modality,
                                   interactive_plot_patient_time,
                                   interactive_plot_patient_time_follow_3d)
-from ml.decision_tree import best_param_tree, plot_tree
+from ml.decision_tree import best_param_tree, plot_tree, delete_col_decision_tree
+from ml.random_forest import random_forest_grid_search, creation_random_forest, evaluate_random_forest
 from statistics.chi2 import (chi2_table, correlation_revealed,
                              modify_df_label_chi2)
 
@@ -1034,6 +1035,50 @@ class GenerateApp():
 
         # Random forest
 
+        # Best param
+        self.app.callback(
+            Output('best_param_random_forest_display', 'children'),
+            [Input('scoring_best_param_random_forest', 'value')]
+        )(self.best_para_rf)
+
+        # Process random forest
+        self.app.callback(
+            [Output('list_feature_importances','children'),
+            Output('confu_matrix_rf_1', 'children'),
+            Output('confu_matrix_rf_2', 'children'),
+            Output('confu_matrix_rf_3', 'children'),
+            Output('classi_report_rf_1','children'),
+            Output('classi_report_rf_2','children'),
+            Output('classi_report_rf_3','children'),
+            Output('classi_report_rf_4','children'),
+            Output('classi_report_rf_5','children'),
+            Output('classi_report_rf_6','children'),
+            Output('classi_report_rf_7','children'),
+            Output('classi_report_rf_8','children'),
+            Output('classi_report_rf_9','children'),
+            Output('classi_report_rf_10','children'),
+            Output('multilab_confu_mat_rf_1','children'),
+            Output('multilab_confu_mat_rf_2','children'),
+            Output('multilab_confu_mat_rf_3','children'),
+            Output('multilab_confu_mat_rf_4','children'),
+            Output('multilab_confu_mat_rf_5','children'),
+            Output('multilab_confu_mat_rf_6','children'),
+            Output('multilab_confu_mat_rf_7','children'),
+            Output('multilab_confu_mat_rf_8','children'),
+            Output('results_prediction_rf', 'children')],
+            [Input('max_depth_rf', 'value'),
+            Input('n_estimators','value'),
+            Input('max_features_rf', 'value'),
+            Input('min_samples_split_rf', 'value'),
+            Input('min_samples_leaf_rf', 'value'),
+            Input('delete_col_rf','value'),
+            Input('use_best_param','value'),
+            Input('patients_to_evaluate', 'value'),
+            Input('choose_period_decision_tree', 'value'),
+            Input('split_size', 'value'),
+            Input('keep_psychose', 'value')]    
+        )(self.random_forest_app)
+            
 
 
 
@@ -1178,12 +1223,13 @@ class GenerateApp():
             self.df_label_ml = self.df_label_ml.drop([patient], axis=0)
             self.df_label_ml.index = [i for i in range (self.df_label_ml.shape[0])]  # Re-index
 
-        # Re process the split in case the rows were modified (one patient removed)    
+        # Process the split in case there are modifications
         self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj_ml,
                                                                                 self.df_label_ml,
                                                                                 choose_period_decision_tree,
                                                                                 split_size,
                                                                                 keep_psychose)
+        print("Size after changing params", len(self.x_train.index))
         if keep_psychose:
             return '', '', {'margin_bottom':'20px'}, {'display':'none'}
         else:
@@ -1199,11 +1245,10 @@ class GenerateApp():
         
         """
         # TODO refactor
-
+        print("Size x_train decision tree", len(self.x_train.index))
         if keep_psychose == True:  #if the patients 'psychose' are still in the study, the weight with them needs to be used
             if isinstance(weight_with_psychose, str) and weight_with_psychose[0] =="{":
                 weight_with_psychose = transform_dict_weight(weight_with_psychose)
-            print("dic weight", weight_with_psychose, type(weight_with_psychose))
 
             tree, confu_matrix, classi_report, multilab_confu_mat  = plot_tree (self.x_train
                                                                             , self.y_train
@@ -1261,6 +1306,91 @@ class GenerateApp():
                 classi_rep_4, classi_rep_5,classi_rep_6, classi_rep_7, classi_rep_8, classi_rep_9, classi_rep_10,
                 multi_confu_mat[0],multi_confu_mat[1],multi_confu_mat[2],multi_confu_mat[3],multi_confu_mat[4],
                 '','','')
+
+    def best_para_rf(self, scoring_best_param_random_forest):
+        grid_score_rf = random_forest_grid_search(self.x_train, self.y_train, scoring_best_param_random_forest)
+        best_score_rf = grid_score_rf.best_params_
+        self.best_random_forest = grid_score_rf.best_estimator_
+        return(str(best_score_rf))
+
+    def random_forest_app(self, max_depth_rf, n_estimators,
+                  max_features_rf, min_samples_split_rf, min_samples_leaf_rf,
+                  delete_col_rf, use_best_param, patient_predict, period_rf, split_size_rf, keep_psychose_rf,):
+        
+        # Copy the data train & test because we may modify data (drop columns) and it must not modify the orign=inal data
+        # Note that the dataframes are already processed according ML parameters (keep psychose, test size, etc)
+        x_train_rf, y_train_rf, x_test_rf, y_test_rf = deepcopy(self.x_train), deepcopy(self.y_train), deepcopy(self.x_test), deepcopy(self.y_test)
+        
+        # Drop the features the user doesn't want to keep in the data
+        if delete_col_rf != []:
+            if patient_predict:
+                self.df_patient_pred = self.df_patient_pred.drop(delete_col_rf, axis=1)
+            x_train_rf, x_test_rf = delete_col_decision_tree(delete_col_rf, x_train_rf, x_test_rf)
+
+        # Whether the parameters of the random forest are the best from the grid search or whether the user choose the param himself
+        if use_best_param==False:  #if the user choose the parameters of the random forest
+            random_forest = creation_random_forest(x_train_rf, y_train_rf, n_estimators, max_depth_rf,
+                                                min_samples_split_rf, min_samples_leaf_rf, max_features_rf, False) 
+            
+        elif use_best_param==True: #if the user choose to use the best parameters for the random forest from the grid search
+            # TODO logical issue
+            if delete_col_rf != []:
+                grid_score_rf = random_forest_grid_search(x_train_rf, y_train_rf, 'accuracy')
+                best_random_forest = grid_score_rf.best_estimator_
+                
+            random_forest = best_random_forest
+
+        list_feature_importances, confu_matrix_rf, classi_report_rf, multilab_confu_mat_rf = evaluate_random_forest(x_train_rf, y_train_rf, x_test_rf, y_test_rf, random_forest)
+        
+        # Format the evaluation matrices
+        L=list_feature_importances
+
+        df_feature_importances_ = pd.DataFrame({'modalités':[str(L[i][1][0])+': '+str(L[i][1][1]) for i in range(len(L))], 'importance':[str(round(L[i][0]*100,1))+'%' for i in range(len(L))]})
+        
+        classi_report_rf = str(classi_report_rf).split('\n')
+        
+        if keep_psychose_rf==True :
+            confu_matrix_rf = processing_matrix_format(confu_matrix_rf, self.classes_name_with_psy, confu_matrix=True, multilabel_confu_m=False)
+            classi_rep_rf_1, classi_rep_rf_2, classi_rep_rf_3, classi_rep_rf_4, classi_rep_rf_5 = classi_report_rf[0],classi_report_rf[1], classi_report_rf[2], classi_report_rf[3], classi_report_rf[4] 
+            classi_rep_rf_6, classi_rep_rf_7, classi_rep_rf_8, classi_rep_rf_9, classi_rep_rf_10 = classi_report_rf[5], classi_report_rf[6], classi_report_rf[7], classi_report_rf[8], classi_report_rf[9]
+            multilab_confu_mat_rf = processing_matrix_format(multilab_confu_mat_rf, self.classes_name_with_psy, confu_matrix=False, multilabel_confu_m=True)
+        
+        elif keep_psychose_rf==False:
+            confu_matrix_rf = processing_matrix_format(confu_matrix_rf, self.classes_name_without_psy, confu_matrix=True, multilabel_confu_m=False)
+            classi_rep_rf_1, classi_rep_rf_2, classi_rep_rf_3, classi_rep_rf_4, classi_rep_rf_5 = classi_report_rf[0],classi_report_rf[1], classi_report_rf[2], classi_report_rf[3], classi_report_rf[4] 
+            classi_rep_rf_6, classi_rep_rf_7, classi_rep_rf_8, classi_rep_rf_9, classi_rep_rf_10 = classi_report_rf[5], classi_report_rf[6], classi_report_rf[7], '', ''
+            multilab_confu_mat_rf = processing_matrix_format(multilab_confu_mat_rf, self.classes_name_without_psy, confu_matrix=False, multilabel_confu_m=True)
+        
+        # prediction of the patients step aside
+        prediction_rf = 'Il n\'y a pas eu de prédiction réalisée'
+
+        if patient_predict:
+            patient_predict = int(patient_predict)
+            prediction_pat = random_forest.predict(self.df_patient_pred)
+            print("prediction", prediction_pat)
+            try:
+                if prediction_pat[1]==1:
+                    prediction_rf = "D'après le modèle, le patient {} appartient à la classe \"pas de risque\"".format(str(patient_predict))
+                elif prediction_pat[1]==3:
+                    prediction_rf = "D'après le modèle, le patient {} appartient à la classe \"à risque\"".format(str(patient_predict))
+                elif prediction_pat[1]==5:
+                    prediction_rf = "D'après le modèle, le patient {} appartient à la classe \"psychose\"".format(str(patient_predict))
+            except:
+                print("erreur dans prediction")
+            
+        if keep_psychose_rf==True :
+            return(generate_table(df_feature_importances_), confu_matrix_rf[0], confu_matrix_rf[1], confu_matrix_rf[2],
+                classi_rep_rf_1, classi_rep_rf_2, classi_rep_rf_3, classi_rep_rf_4, classi_rep_rf_5,
+                classi_rep_rf_6, classi_rep_rf_7, classi_rep_rf_8, classi_rep_rf_9, classi_rep_rf_10,
+                multilab_confu_mat_rf[0],multilab_confu_mat_rf[1],multilab_confu_mat_rf[2],multilab_confu_mat_rf[3],
+                multilab_confu_mat_rf[4],multilab_confu_mat_rf[5],multilab_confu_mat_rf[6],multilab_confu_mat_rf[7], prediction_rf)
+
+        elif keep_psychose_rf==False:
+            return(generate_table(df_feature_importances_), confu_matrix_rf[0], confu_matrix_rf[1], '',
+                classi_rep_rf_1, classi_rep_rf_2, classi_rep_rf_3, classi_rep_rf_4, classi_rep_rf_5,
+                classi_rep_rf_6, classi_rep_rf_7, classi_rep_rf_8, classi_rep_rf_9, classi_rep_rf_10,
+                multilab_confu_mat_rf[0],multilab_confu_mat_rf[1],multilab_confu_mat_rf[2],multilab_confu_mat_rf[3],
+                multilab_confu_mat_rf[4],'','','', prediction_rf)
 
 
     def process_pipelines(self, *args, **kwargs):
