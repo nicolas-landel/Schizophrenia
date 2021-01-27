@@ -1,17 +1,13 @@
 import math
-import statistics
-from statistics.chi2 import (chi2_table, correlation_revealed,
-                             modify_df_label_chi2)
-
 import dash_core_components as dcc
 import dash_html_components as html
-import disjunctive_array
-import mca
-import ml
 import pandas as pd
-import preprocessing
-import visualisation
+import ast
+import base64
 from dash.dependencies import Input, Output, State
+
+
+
 from disjunctive_array.pipeline import (pipeline_disjunctive_df_data,
                                         pipeline_disjunctive_df_label)
 from ml.utils import split_train_test
@@ -27,8 +23,9 @@ from visualisation.graphs import (creation_dataframe_distance_modalities,
                                   interactive_plot_patient_modality,
                                   interactive_plot_patient_time,
                                   interactive_plot_patient_time_follow_3d)
-from ml.decision_tree import best_param_tree
-
+from ml.decision_tree import best_param_tree, plot_tree
+from statistics.chi2 import (chi2_table, correlation_revealed,
+                             modify_df_label_chi2)
 
 class GenerateApp():
     """
