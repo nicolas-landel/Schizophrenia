@@ -26,6 +26,20 @@ Then you can check the local address http://localhost:8000
 
 - Refactor the functions, comments, process 
 
-- use callbacks for the html in the class and import the utils function in the notebook
-- refactor the html (cf todo in code)
 - process the df for the visualization and for the ML
+
+- accentuate the separation of the ML general parameters from the rest of the code
+
+- Use classes instead of inline css
+
+- Set a max width for decision tree png
+
+- Re do all the css ...
+
+- re-do the best param of RF
+
+- Re-do the comments of the grap pat 3D
+
+- check the web errors in the console
+
+
