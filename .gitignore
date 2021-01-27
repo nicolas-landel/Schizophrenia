@@ -7,3 +7,6 @@
 # Data
 application/data/.*
 raw_data.csv
+
+# Images, as there are confidential data
+images/
