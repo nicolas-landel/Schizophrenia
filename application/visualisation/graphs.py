@@ -7,6 +7,9 @@ from scipy.spatial import distance
 from plotly.offline import offline
 
 
+# class graphs(): # TODO class with init and all the graphs
+
+
 def prepare_square_plotly(fs_id1, fs_id2, table):
     """ This function plots a square. It allows us to determine the modalities where the contribution ((weight*(aj)**2))/eigenvalue
     is superior to the weight(nb elements in the modality/ (nb of modalities * nb of features))
@@ -106,7 +109,7 @@ def interactive_plot_variable_by_variable(table, table_explained_mca, fs_id1, fs
     data_ = data_col + data_lab
 
     if square == True:
-        data = data_ + prepare_square_plotly(fs_id1, fs_id2)  # if the option 'square limit' is active
+        data = data_ + prepare_square_plotly(fs_id1, fs_id2, table_explained_mca)  # if the option 'square limit' is active
         # it will plot a square
     else:
         data = data_
@@ -121,9 +124,9 @@ def interactive_plot_variable_by_variable(table, table_explained_mca, fs_id1, fs
 
     fig = go.Figure(data=data, layout=layout)
 
-    offline.plot(fig, filename='Images/Variables dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Variables dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
@@ -197,6 +200,8 @@ def interactive_plot_3D_features(fs_id1, fs_id2, fs_id3, table, display=True):  
 
 # Patient graphs
 
+# TODO class
+
 
 def select_list_to_delete_from_list_to_keep(df, list_to_keep):
     """
@@ -269,9 +274,9 @@ def interactive_plot_patient_modality(variable, df_var, table_patients_mca, tabl
 
     fig = go.Figure(data=data_, layout=layout)
 
-    offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Patients dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
@@ -451,9 +456,9 @@ def interactive_plot_patient_time(df, df_label_color, list_patients_to_keep, fs_
         height=600
     )
 
-    offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
@@ -746,9 +751,9 @@ def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patien
         height=600
     )
 
-    offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
-                 # to save the figure in the repertory
-                 auto_open=False)
+    # offline.plot(fig, filename='Images/Patients en fonction du temps dans le plan des facteurs scores.html',
+    #              # to save the figure in the repertory
+    #              auto_open=False)
 
     if display:
         offline.iplot(fig)
@@ -759,6 +764,7 @@ def interactive_plot_patient_time_follow_3d(list_df, df_label_color, list_patien
 
 # Study MCA
 
+# TODO class
 
 def position_vector(df, indice_fs1, indice_fs2):
     """ This function creates a (list of lists) of the values in the dataframe table_modalities_mca resulting of the MCA :
@@ -846,25 +852,3 @@ def select_dist_modalities(modality, df_modalities_distances, dist_max, df_data_
                     df_selected_distances = df_selected_distances.append(dic_temp, ignore_index=True)
 
     return df_selected_distances.sort_values(by=['distance', 'effectif'])
-
-
-def apply_mca_analysis(fs_id1, fs_id2, dist_max, modality, table_modalities_mca, table_explained_mca, df_data_disj,
-                       df_label_disj):
-    """
-    Pipeline of the functions above which allows to create the dataframe of the closest modalities of the modality chosen
-
-    """
-    global df_distances
-    # storing the postion of the modalities in the plan of the factors fs_id1 and fs_id2
-    vect, pos_x, pos_y, new_norm = position_vector(table_modalities_mca, fs_id1, fs_id2)
-
-    # calculating the distances between the significant modalities and storing them in a upper dataframe
-    df_distances = creation_dataframe_distance_modalities(pos_x, pos_y, fs_id1, fs_id2, table_modalities_mca,
-                                                          table_explained_mca)
-
-    # create a dataframe (modality, dist, effective) of the modalities having a
-    #lower distance than dist_max with the modality
-    df_close_modalities = select_dist_modalities(modality, df_distances, dist_max, df_data_disj, df_label_disj)
-
-    return df_close_modalities
-

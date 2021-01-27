@@ -1,8 +1,6 @@
 import math
 import re
 import graphviz
-from IPython.display import SVG
-from IPython.display import display
 from sklearn.metrics import confusion_matrix, classification_report, multilabel_confusion_matrix
 from sklearn.model_selection import GridSearchCV
 
@@ -97,8 +95,7 @@ def delete_col_decision_tree(col_list, data1, data2):
     return data1_new, data2_new
 
 
-def plot_tree(x_train, y_train, x_test, y_test, classes_name, depth, min_split, min_leaf, weight, display_image=True,
-              delete_col=False):
+def plot_tree(x_train, y_train, x_test, y_test, classes_name, depth, min_split, min_leaf, weight, delete_col=False):
     """
     This function creates an interactive decision tree. This uses the cross validation
 
@@ -134,21 +131,18 @@ def plot_tree(x_train, y_train, x_test, y_test, classes_name, depth, min_split, 
                                        , class_weight=weight)
 
     if not delete_col:  # case there is no deletion of column  (at the beginning of the application)
-        print('pas delete')
         # We are going to apply the function delete_col_decision_tree where delete_col is an empty list so nothing is
         # done
         delete_col = [None]
         x_train_filtered, x_test_filtered = delete_col_decision_tree(delete_col, x_train, x_test)  #
     else:
-        print('delete', delete_col)
         # if we want to not take a column into consideration for the tree
         x_train_filtered, x_test_filtered = delete_col_decision_tree(delete_col, x_train, x_test)
 
-    print(y_train.unique())
     estimator.fit(x_train_filtered, y_train)  # train the tree on the train data and train label
     # save the graph as 'decision tree.dot' in the current repository
     dot_tree = export_graphviz(estimator
-                               , out_file='decision tree.dot'
+                               , out_file='./ml/images/decision_tree.dot'
                                , feature_names=x_train_filtered.columns
                                # link the feature indexes to the feature names (columns of the data frame)
                                , class_names=classes_name
@@ -157,13 +151,13 @@ def plot_tree(x_train, y_train, x_test, y_test, classes_name, depth, min_split, 
                                , rounded=True)  # graphical style
 
     # apply the function modify_tree_to_categorical to the tree we created
-    dot_tree_modified = modify_tree_to_categorical("decision tree.dot")
+    dot_tree_modified = modify_tree_to_categorical("./ml/images/decision_tree.dot")
     # in order to have a better visual
     graph = graphviz.Source(dot_tree_modified)
 
     image = graph.pipe(format='png')
 
-    file = open('decision_tree_modified.png', 'wb')
+    file = open('./ml/images/decision_tree_modified.png', 'wb')
     file.write(image)
     file.close()
 
@@ -175,12 +169,8 @@ def plot_tree(x_train, y_train, x_test, y_test, classes_name, depth, min_split, 
     elif len(classes_name) == 2:
         classi_report = classification_report(y_test, prediction, [1, 3], classes_name)
     mutlilab_confu_mat = multilabel_confusion_matrix(y_test, prediction)
-    if display_image:
-        display(SVG(graph.pipe(format='svg')))
-        return None
-
-    else:
-        return image, confu_matrix, classi_report, mutlilab_confu_mat,
+    
+    return image, confu_matrix, classi_report, mutlilab_confu_mat,
 
 
 def best_param_tree(scoring, nb_cv, x_train, y_train):

@@ -21,3 +21,25 @@ If you have already done this command and built the images, just write:
 ``docker-compose up -d``
 
 Then you can check the local address http://localhost:8000
+
+# TODO
+
+- Refactor the functions, comments, process 
+
+- process the df for the visualization and for the ML
+
+- accentuate the separation of the ML general parameters from the rest of the code
+
+- Use classes instead of inline css
+
+- Set a max width for decision tree png
+
+- Re do all the css ...
+
+- re-do the best param of RF
+
+- Re-do the comments of the grap pat 3D
+
+- check the web errors in the console
+
+

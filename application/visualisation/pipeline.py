@@ -1,4 +1,4 @@
-from Schizophrenia.application.visualisation.utils import (
+from .graphs import (
     position_vector,
     creation_dataframe_distance_modalities,
     select_dist_modalities,
@@ -11,8 +11,6 @@ def apply_mca_analysis(fs_id1, fs_id2, dist_max, modality, table_modalities_mca,
     Pipeline of the functions above which allows to create the dataframe of the closest modalities of the modality chosen
 
     """
-    # todo change to not use global !
-    global df_distances
     # storing the position of the modalities in the plan of the factors fs_id1 and fs_id2
     vect, pos_x, pos_y, new_norm = position_vector(table_modalities_mca, fs_id1, fs_id2)
 

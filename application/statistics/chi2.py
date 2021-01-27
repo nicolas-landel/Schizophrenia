@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency
 
-from Schizophrenia.application.disjunctive_array.utils import creation_dic_nb_val_by_col_label, split_columns
+from disjunctive_array.utils import creation_dic_nb_val_by_col_label, split_columns
 
 
 def chi2_table(df):

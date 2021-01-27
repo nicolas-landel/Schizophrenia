@@ -8,13 +8,16 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 # set work directory
 RUN mkdir code
-WORKDIR code
+WORKDIR /code
 
 # copy project to /code
 COPY . .
 
 #RUN apk update \
 #    && apk add gcc g++ python3-dev musl-dev
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends graphviz 
 
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
