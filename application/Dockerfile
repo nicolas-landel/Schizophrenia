@@ -16,5 +16,8 @@ COPY . .
 #RUN apk update \
 #    && apk add gcc g++ python3-dev musl-dev
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends graphviz 
+
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
