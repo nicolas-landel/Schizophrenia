@@ -38,6 +38,7 @@ class GenerateApp():
     period = 4
     test_size = 0.2
     df_distances = pd.DataFrame()
+    counter = 0
 
     def __init__(self, *args, **kwargs):
         print("INIT KWARGS", kwargs)
@@ -473,7 +474,6 @@ class GenerateApp():
                                         value=1,
                                         labelStyle={'display': 'inline-block'}
                                     ),
-                                    html.P(id='hidden_div2', style={'display':'none'}),
                                     html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?'),  
                                     dcc.RadioItems(
                                         id="keep_patient_aside",
@@ -492,9 +492,10 @@ class GenerateApp():
                                                 options=[{'label':i, 'value':i} for i in (self.df_data_disj.index.to_list())],
                                                 value=None
                                             ), 
-                                            html.Div(id="hidden_div5", style={'display':'none'})
+                                            html.Div(id="hidden_div5", style={'display':'none'}),
                                         ]
-                                    )                
+                                    ),
+                                    html.P(id='data_preparation_state', children='0', style={'opacity': '0'}),                
                                 ]
                             ),
                             html.Div(id="all of the decision tree",
@@ -976,7 +977,7 @@ class GenerateApp():
 
         self.app.callback(
             [Output('hidden_div5', 'children'),
-            Output('hidden_div2','children'),
+            Output('data_preparation_state','children'),
             Output('div_weight_with_psychose', 'style'),
             Output('div_weight_without_psychose', 'style')],
             [Input('patients_to_evaluate', 'value'),
@@ -1026,11 +1027,14 @@ class GenerateApp():
                 Input('weight_with_psychose','value'),
                 Input('weight_without_psychose','value'),
                 Input('delete_col','value'),
-                Input('keep_psychose', 'value'),
-                Input('choose_period_decision_tree', 'value'),
-                Input('patients_to_evaluate', 'value'),
-                Input('split_size', 'value'),
-                ]
+                Input('data_preparation_state', 'children')
+            ],
+            [
+                State('keep_psychose', 'value'),
+                State('choose_period_decision_tree', 'value'),
+                State('patients_to_evaluate', 'value'),
+                State('split_size', 'value'),
+            ]
         )(self.update_graph)
 
         # Random forest
@@ -1043,40 +1047,47 @@ class GenerateApp():
 
         # Process random forest
         self.app.callback(
-            [Output('list_feature_importances','children'),
-            Output('confu_matrix_rf_1', 'children'),
-            Output('confu_matrix_rf_2', 'children'),
-            Output('confu_matrix_rf_3', 'children'),
-            Output('classi_report_rf_1','children'),
-            Output('classi_report_rf_2','children'),
-            Output('classi_report_rf_3','children'),
-            Output('classi_report_rf_4','children'),
-            Output('classi_report_rf_5','children'),
-            Output('classi_report_rf_6','children'),
-            Output('classi_report_rf_7','children'),
-            Output('classi_report_rf_8','children'),
-            Output('classi_report_rf_9','children'),
-            Output('classi_report_rf_10','children'),
-            Output('multilab_confu_mat_rf_1','children'),
-            Output('multilab_confu_mat_rf_2','children'),
-            Output('multilab_confu_mat_rf_3','children'),
-            Output('multilab_confu_mat_rf_4','children'),
-            Output('multilab_confu_mat_rf_5','children'),
-            Output('multilab_confu_mat_rf_6','children'),
-            Output('multilab_confu_mat_rf_7','children'),
-            Output('multilab_confu_mat_rf_8','children'),
-            Output('results_prediction_rf', 'children')],
-            [Input('max_depth_rf', 'value'),
-            Input('n_estimators','value'),
-            Input('max_features_rf', 'value'),
-            Input('min_samples_split_rf', 'value'),
-            Input('min_samples_leaf_rf', 'value'),
-            Input('delete_col_rf','value'),
-            Input('use_best_param','value'),
-            Input('patients_to_evaluate', 'value'),
-            Input('choose_period_decision_tree', 'value'),
-            Input('split_size', 'value'),
-            Input('keep_psychose', 'value')]    
+            [
+                Output('list_feature_importances','children'),
+                Output('confu_matrix_rf_1', 'children'),
+                Output('confu_matrix_rf_2', 'children'),
+                Output('confu_matrix_rf_3', 'children'),
+                Output('classi_report_rf_1','children'),
+                Output('classi_report_rf_2','children'),
+                Output('classi_report_rf_3','children'),
+                Output('classi_report_rf_4','children'),
+                Output('classi_report_rf_5','children'),
+                Output('classi_report_rf_6','children'),
+                Output('classi_report_rf_7','children'),
+                Output('classi_report_rf_8','children'),
+                Output('classi_report_rf_9','children'),
+                Output('classi_report_rf_10','children'),
+                Output('multilab_confu_mat_rf_1','children'),
+                Output('multilab_confu_mat_rf_2','children'),
+                Output('multilab_confu_mat_rf_3','children'),
+                Output('multilab_confu_mat_rf_4','children'),
+                Output('multilab_confu_mat_rf_5','children'),
+                Output('multilab_confu_mat_rf_6','children'),
+                Output('multilab_confu_mat_rf_7','children'),
+                Output('multilab_confu_mat_rf_8','children'),
+                Output('results_prediction_rf', 'children')
+            ],
+            [
+                Input('max_depth_rf', 'value'),
+                Input('n_estimators','value'),
+                Input('max_features_rf', 'value'),
+                Input('min_samples_split_rf', 'value'),
+                Input('min_samples_leaf_rf', 'value'),
+                Input('delete_col_rf','value'),
+                Input('use_best_param','value'),
+                Input('data_preparation_state', 'children'),
+            ],
+            [
+                State('patients_to_evaluate', 'value'),
+                State('choose_period_decision_tree', 'value'),
+                State('split_size', 'value'),
+                State('keep_psychose', 'value'),
+            ]    
         )(self.random_forest_app)
             
 
@@ -1229,18 +1240,19 @@ class GenerateApp():
                                                                                 choose_period_decision_tree,
                                                                                 split_size,
                                                                                 keep_psychose)
+        self.counter += 1
         print("Size after changing params", len(self.x_train.index))
         if keep_psychose:
-            return '', '', {'margin_bottom':'20px'}, {'display':'none'}
+            return '', str(self.counter), {'margin_bottom':'20px'}, {'display':'none'}
         else:
-            return '', '',  {'display':'none'}, {'margin_bottom':'20px'}
+            return '', str(self.counter), {'display':'none'}, {'margin_bottom':'20px'}
     
     def best_para_tree(self, scoring_best_para):
         best_score, grid_score = best_param_tree(scoring_best_para, 5, self.x_train, self.y_train)
         return str(best_score)
 
     def update_graph(self, depth_, min_split_, min_leaf_, weight_with_psychose,
-                 weight_without_psychose, delete_col, keep_psychose, choose_period_decision_tree, patient_removed, split_size):
+                 weight_without_psychose, delete_col, state, keep_psychose, choose_period_decision_tree, patient_removed, split_size):
         """
         
         """
@@ -1315,7 +1327,7 @@ class GenerateApp():
 
     def random_forest_app(self, max_depth_rf, n_estimators,
                   max_features_rf, min_samples_split_rf, min_samples_leaf_rf,
-                  delete_col_rf, use_best_param, patient_predict, period_rf, split_size_rf, keep_psychose_rf,):
+                  delete_col_rf, use_best_param, state, patient_predict, period_rf, split_size_rf, keep_psychose_rf,):
         
         # Copy the data train & test because we may modify data (drop columns) and it must not modify the orign=inal data
         # Note that the dataframes are already processed according ML parameters (keep psychose, test size, etc)
