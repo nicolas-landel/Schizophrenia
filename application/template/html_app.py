@@ -1019,6 +1019,44 @@ class GenerateApp():
             [Input('scoring_best_para', 'value')]
         )(self.best_para_tree)
 
+        # decision tree
+        self.app.callback(
+            [
+                Output('decision tree', 'src'),
+                Output('confu_matrix_1', 'children'),
+                Output('confu_matrix_2', 'children'),
+                Output('confu_matrix_3', 'children'),
+                Output('classi_rep_1', 'children'),
+                Output('classi_rep_2', 'children'),
+                Output('classi_rep_3', 'children'),
+                Output('classi_rep_4', 'children'),
+                Output('classi_rep_5', 'children'),
+                Output('classi_rep_6', 'children'),
+                Output('classi_rep_7', 'children'),
+                Output('classi_rep_8', 'children'),
+                Output('classi_rep_9', 'children'),
+                Output('classi_rep_10', 'children'),
+                Output('multi_confu_1', 'children'),
+                Output('multi_confu_2', 'children'),
+                Output('multi_confu_3', 'children'),
+                Output('multi_confu_4', 'children'),
+                Output('multi_confu_5', 'children'),
+                Output('multi_confu_6', 'children'),
+                Output('multi_confu_7', 'children'),
+                Output('multi_confu_8', 'children')
+            ],
+            [
+                Input('depth_', 'value'),
+                Input('min_split_', 'value'),
+                Input('min_leaf_', 'value'),
+                Input('weight_with_psychose','value'),
+                Input('weight_without_psychose','value'),
+                Input('delete_col','value'),
+                Input('keep_psychose', 'value'),
+                Input("choose_period_decision_tree", 'value')
+                ]
+        )(self.update_graph)
+
 
     def choose_patients_lost(self, name_file, option_lost):
         self.df_data, self.df_label = pipeline_preprocessing(name_file, option_lost, 0)
@@ -1140,6 +1178,75 @@ class GenerateApp():
         best_score, grid_score = best_param_tree(scoring_best_para, 5, self.x_train, self.y_train)
         return str(best_score)
 
+    def update_graph(self, depth_, min_split_, min_leaf_, weight_with_psychose,
+                 weight_without_psychose, delete_col, keep_psychose, choose_period_decision_tree):
+        """
+        """
+        # x_train, y_train, x_test, y_test = split_train_test(df_data_disj, df_label, choose_period_decision_tree, 0.2, keep_psychose)
+        
+
+        if keep_psychose == True:  #if the patients 'psychose' are still in the study, the weight with them needs to be used
+            if isinstance(weight_with_psychose, str) and weight_with_psychose[0] =="{":
+                weight_with_psychose = transform_dict_weight(weight_with_psychose)
+            print("dic weight", weight_with_psychose, type(weight_with_psychose))
+
+            tree, confu_matrix, classi_report, multilab_confu_mat  = plot_tree (self.x_train
+                                                                            , self.y_train
+                                                                            , self.x_test
+                                                                            , self.y_test
+                                                                            , self.classes_name_with_psy
+                                                                            , depth= depth_
+                                                                            , min_split= min_split_
+                                                                            , min_leaf= min_leaf_
+                                                                            , weight = weight_with_psychose
+                                                                            , delete_col =delete_col
+                                                                            )
+            
+            confu_mat_ok = processing_matrix_format(confu_matrix, self.classes_name_with_psy, confu_matrix=True, multilabel_confu_m=False)  # formatting the confusion matrix
+            multi_confu_mat = processing_matrix_format(multilab_confu_mat, self.classes_name_with_psy, confu_matrix=False, multilabel_confu_m=True)
+            encoded_image = base64.b64encode(open('./ml/images/decision_tree_modified.png', 'rb').read())
+            classi_report = str(classi_report).split('\n')
+            
+            classi_rep_1, classi_rep_2, classi_rep_3, classi_rep_4, classi_rep_5 = classi_report[0],classi_report[1], classi_report[2], classi_report[3], classi_report[4] 
+            classi_rep_6, classi_rep_7, classi_rep_8, classi_rep_9, classi_rep_10 = classi_report[5], classi_report[6], classi_report[7], classi_report[8], classi_report[9] 
+        
+            
+            return ('data:image/png;base64,{}'.format(encoded_image.decode()),
+                confu_mat_ok[0],confu_mat_ok[1],confu_mat_ok[2],classi_rep_1, classi_rep_2, classi_rep_3,
+                classi_rep_4, classi_rep_5,classi_rep_6, classi_rep_7, classi_rep_8, classi_rep_9, classi_rep_10,
+                multi_confu_mat[0],multi_confu_mat[1],multi_confu_mat[2],multi_confu_mat[3],multi_confu_mat[4],
+                multi_confu_mat[5],multi_confu_mat[6],multi_confu_mat[7])
+            
+        elif keep_psychose == False:
+            if isinstance(weight_without_psychose, str) and weight_without_psychose[0] =="{":
+                weight_without_psychose = transform_dict_weight(weight_without_psychose)
+            tree, confu_matrix, classi_report, multilab_confu_mat  = plot_tree (self.x_train
+                                                                            , self.y_train
+                                                                            , self.x_test
+                                                                            , self.y_test
+                                                                            , self.classes_name_without_psy
+                                                                        , depth= depth_
+                                                                        , min_split= min_split_
+                                                                        , min_leaf= min_leaf_
+                                                                        , weight = weight_without_psychose
+                                                                        , delete_col =delete_col
+                                                                        )
+            
+            confu_mat_ok = processing_matrix_format(confu_matrix, self.classes_name_without_psy, confu_matrix=True, multilabel_confu_m=False)  #foramtting the confusion matrix
+            multi_confu_mat = processing_matrix_format(multilab_confu_mat, self.classes_name_without_psy, confu_matrix=False, multilabel_confu_m=True)
+
+            encoded_image = base64.b64encode(open('.ml/images/decision_tree_modified.png', 'rb').read())
+            classi_report = str(classi_report).split('\n')
+    
+            classi_rep_1, classi_rep_2, classi_rep_3, classi_rep_4, classi_rep_5 = classi_report[0],classi_report[1], classi_report[2], classi_report[3], classi_report[4] 
+            classi_rep_6, classi_rep_7, classi_rep_8, classi_rep_9, classi_rep_10 = classi_report[5], classi_report[6], classi_report[7],'', ''
+        
+            return ('data:image/png;base64,{}'.format(encoded_image.decode()),
+                confu_mat_ok[0],confu_mat_ok[1],'',classi_rep_1, classi_rep_2, classi_rep_3,
+                classi_rep_4, classi_rep_5,classi_rep_6, classi_rep_7, classi_rep_8, classi_rep_9, classi_rep_10,
+                multi_confu_mat[0],multi_confu_mat[1],multi_confu_mat[2],multi_confu_mat[3],multi_confu_mat[4],
+                '','','')
+
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
         print("DF DATA", self.df_data.iloc[10,10])
@@ -1174,8 +1281,11 @@ class GenerateApp():
 
 # Utils functions
 
-def transform_dict_weight(dic):
-    """ an intermedian function used in the app below to transform the weight of the decision tree when it s a dic"""
+def transform_dict_weight(dic_as_str):
+    """
+    Transform a string of a dictionary into a dictionary and change its keys to be integer
+    """
+    dic = ast.literal_eval(dic_as_str)
     new_dic={}
     for k in dic.keys():
         new_dic[int(k)]=dic[k]  # change string to int
