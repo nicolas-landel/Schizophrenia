@@ -4,6 +4,7 @@ import dash_html_components as html
 import pandas as pd
 import ast
 import base64
+from copy import deepcopy
 from dash.dependencies import Input, Output, State
 
 
@@ -1247,12 +1248,16 @@ class GenerateApp():
                 multi_confu_mat[0],multi_confu_mat[1],multi_confu_mat[2],multi_confu_mat[3],multi_confu_mat[4],
                 '','','')
 
+
     def process_pipelines(self, *args, **kwargs):
         self.df_data, self.df_label = pipeline_preprocessing('raw_data.csv', option_patients_lost=2, period=self.period)
         print("DF DATA", self.df_data.iloc[10,10])
         self.df_color_all_lab = apply_color_label(self.df_label)
         self.df_data_disj = pipeline_disjunctive_df_data(self.df_data)
         self.df_label_disj = pipeline_disjunctive_df_label(self.df_label)
+        # Init the dataframes used for the ML tasks
+        self.df_data_disj_ml = deepcopy(self.df_data_disj)
+        self.df_label_ml = deepcopy(self.df_label)
         self.list_df_data_disj = [self.df_data_disj]*5  # Need to be modify if we really want to take the time evolution into account
         (
             self.table_modalities_mca,
@@ -1261,7 +1266,8 @@ class GenerateApp():
             self.table_explained_mca,
             self.list_table_patients_mca_time
          ) = pipeline_mca(self.list_df_data_disj, 0, self.df_label_disj, nb_factors=10, benzecri=False)
-        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj, self.df_label, self.period, self.test_size, keep_psychose=True)
+         # Init the train and test data but it is overwritten
+        self.x_train, self.y_train, self.x_test, self.y_test = split_train_test(self.df_data_disj_ml, self.df_label_ml, self.period, self.test_size, keep_psychose=True)
 
     def display_list_chi2_correlation(self, threshold_chi2, minimum_elements, chi2_label):
         print("CALLBACK CHI2")
