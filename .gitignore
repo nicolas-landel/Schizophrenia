@@ -5,8 +5,7 @@
 .vscode/
 
 # Data
-application/data/.*
-raw_data.csv
+application/data/*
 
 # Images, as there are confidential data
-images/
+application/ml/images/*
