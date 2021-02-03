@@ -626,7 +626,7 @@ class GenerateApp():
                                                 diagonales : ils ont été prédits dans leur classe.", className="explanation"
                                             ),
                                             html.Div(id="confusion matrix",
-                                                className="confusion-matrix-tree",
+                                                className="confusion-matrix",
                                                 children=[
                                                     html.Div(id="column", children=["Prédictions"]),
                                                     html.Div(id="confu_matrix_1"),
@@ -658,6 +658,13 @@ class GenerateApp():
                                             html.Div(id="multilabel_confusion_matrix",
                                                 children=[
                                                     html.H5(id="mutlilabel title", children="Matrice de confusion pour chaque classe :"),
+                                                    html.P(className="explanation",
+                                                        children="Nous réalisons ici la matrice de confusion pour chaque classe, indépendamment des autres. C'est à dire que nous testons si le patient appartient ou non à la classe. \
+                                                            Nous avons horizontalement, sur la première ligne les patients qui n'appartiennent pas à la classe en question et sur la seconde ligne, les patients qui appartiennet à la classe. \
+                                                            Verticalement, nous avons les prédictions. Dans la première colonne, on a les patients qui n'ont pas été prédits comme appartenant à la classe et dans la seconde colonne ceux ayant \
+                                                            été prédits comme appartenant à la classe. On voit donc que plus le modèle est performant, plus il y a de patients sur la diagonale, la première case \
+                                                            représentant les vrais négatifs et celle en bas à droite les vrais positifs."
+                                                    ),
                                                     html.Div(id="mutlilabel_confu_mat",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                                 "text-align-last": "right","white-space":"pre"
@@ -675,13 +682,6 @@ class GenerateApp():
                                                         ]
                                                     ),
                                                 ]
-                                            ),
-                                            html.P(className="explanation",
-                                                children="Nous réalisons ici la matrice de confusion pour chaque classe, indépendamment des autres. C'est à dire que nous testons si le patient appartient ou non à la classe. \
-                                                    Nous avons horizontalement, sur la première ligne les patients qui n'appartiennent pas à la classe en question et sur la seconde ligne, les patients qui appartiennet à la classe. \
-                                                    Verticalement, nous avons les prédictions. Dans la première colonne, on a les patients qui n'ont pas été prédits comme appartenant à la classe et dans la seconde colonne ceux ayant \
-                                                    été prédits comme appartenant à la classe. On voit donc que plus le modèle est performant, plus il y a de patients sur la diagonale, la première case \
-                                                    représentant les vrais négatifs et celle en bas à droite les vrais positifs."
                                             )
                                         ]
                                     )
@@ -706,7 +706,7 @@ class GenerateApp():
                                             html.Div(id="best_param_random_forest", 
                                                 children=[
                                                     html.H4("Calcul des meilleurs paramètres"),   
-                                                    html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):"), 
+                                                    html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):", className="question"), 
                                                     dcc.Input(
                                                         id='scoring_best_param_random_forest',
                                                         value='accuracy', 
@@ -720,7 +720,8 @@ class GenerateApp():
                                     ),
                                     html.Div(id="all the parameters of the rf",
                                         children=[
-                                            html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? "),  
+                                            html.H4(children="Paramétrage du modèle"),
+                                            html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? ", className="question"),  
                                             dcc.RadioItems(
                                                 id="use_best_param",
                                                 options=[
@@ -730,14 +731,14 @@ class GenerateApp():
                                                 value=0,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Profondeur maximale de l'arbre :"),
+                                            html.P("Profondeur maximale de l'arbre :", className="question"),
                                             dcc.RadioItems(
                                                 id='max_depth_rf',
                                                 options=[{'label':i, 'value': i} for i in [2,3,4,'none']],
                                                 value=3,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre d'arbres de décision dans la forêt aléatoire :"),
+                                            html.P("Nombre d'arbres de décision dans la forêt aléatoire :", className="question"),
                                             dcc.RadioItems(
                                                 id='n_estimators',
                                                 options=[
@@ -749,7 +750,7 @@ class GenerateApp():
                                                 value=50,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre maximal de modalités disponibles pour un arbre :"),
+                                            html.P("Nombre maximal de modalités disponibles pour un arbre :", className="question"),
                                             dcc.RadioItems(
                                                 id='max_features_rf',
                                                 options=[
@@ -762,7 +763,7 @@ class GenerateApp():
                                                 value=30,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre minimum de patients en sortie de noeud "),
+                                            html.P("Nombre minimum de patients en sortie de noeud ", className="question"),
                                             dcc.Slider(
                                                 id='min_samples_split_rf',
                                                 min=2,
@@ -770,7 +771,7 @@ class GenerateApp():
                                                 marks={i: 'min_split {}'.format(i) for i in range(2,11)},
                                                 value=5
                                             ),
-                                            html.P("Nombre minimum de patients dans une feuille "), 
+                                            html.P("Nombre minimum de patients dans une feuille ", className="question"), 
                                             dcc.Slider(
                                                 id='min_samples_leaf_rf',
                                                 min=1,
@@ -778,7 +779,7 @@ class GenerateApp():
                                                 marks={i: 'min_leaf {}'.format(i) for i in range(1,11)},
                                                 value=5
                                             ),
-                                            html.P("Voulez-vous retirer des variables du modèle ? "), 
+                                            html.P("Voulez-vous retirer des variables du modèle ? ", className="question"), 
                                             dcc.Dropdown(
                                                 id='delete_col_rf',
                                                 options=[{'label': i, 'value': i} for i in self.x_train.columns.get_level_values('features').unique().to_list()],
@@ -789,7 +790,7 @@ class GenerateApp():
                                     ),           
                                     html.Div(id='analysis random forest',
                                         children=[
-                                            html.H2(children="Etude de la forêt aléatoire : test de prédiction ", style={'margin-bottom':"20px"}),
+                                            html.H4(children="Etude de la forêt aléatoire"),
                                             html.H5("Résultats de la prédiction :"),
                                             dcc.Loading(
                                                 id="loading-6",
@@ -797,7 +798,7 @@ class GenerateApp():
                                                 children=html.P(id="results_prediction_rf", style={"margin-bottom":"15px"})
                                             ),
                                             html.H5(id='list_feature_importances_title', children="Importance des variables dans la forêt aléatoire "),
-                                            html.P(id="list_feature_importances"),
+                                            html.Div(id="list_feature_importances", className="rf-feature-importance"),
                                             html.H5(id="confusion matrix rf title", children="Matrice de confusion de la forêt aléatoire"),
                                             html.P(id="explication_rf", 
                                                 children="Les lignes de la matrice de confusion représentent les classes\
@@ -807,8 +808,7 @@ class GenerateApp():
                                                 style={"margin-bottom":"20px"}
                                             ),
                                             html.Div(id="confusion matrix rf",
-                                                style={"display":"grid", "margin-right":"70%","font-size":"20px",
-                                                    "text-align-last": "right","white-space":"pre"},
+                                                className="confusion-matrix",
                                                 children=[
                                                     html.P(id="column_rf", children=["Prédictions"]),
                                                     html.P(id="confu_matrix_rf_1"),
@@ -819,7 +819,6 @@ class GenerateApp():
                                             html.Div(id="classi_report_rf",
                                                 children=[
                                                     html.H5(id="classification report title", children="Analyse de la forêt aléatoire"),
-                                                    html.P(id="explication_classi_rf", children=" explication"),
                                                     html.Div(id="classification report_rf",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                             "text-align-last": "right","white-space":"pre"},
@@ -841,7 +840,6 @@ class GenerateApp():
                                             html.Div(id="multilabel_confusion_matrix_rf",
                                                 children=[
                                                     html.H5(id="mutlilabel title rf", children="Matrice de confusion pour chaque classe"),
-                                                    html.P(id="explication_multilab_rf", children=" La matrice de confusion est calculée pour chaque classe."),
                                                     html.Div(id="mutlilabel_confu_mat_rf",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                             "text-align-last": "right","white-space":"pre"},
@@ -865,11 +863,6 @@ class GenerateApp():
                         ]
                     )
                 ],
-                style = {"position": "relative", "background-color": "white", "border-radius": "2px 2px 5px 5px",
-                        "font-size": "1.5rem", "box-shadow": "rgb(240, 240, 240) 5px 5px 5px 0px",
-                        "border": "thin solid rgb(240, 240, 240)", "margin-left": "auto","margin-right": "auto","color": "#302F54",
-                        "padding": "8px", "width": "90%", "max-width": "none","box-sizing":"border-box"
-                }
             )   
         ]
 
@@ -883,14 +876,14 @@ class GenerateApp():
         )(self.choose_patients_lost)
 
         # Chi2
-        # self.app.callback(
-        #     [Output('list of correlation1', 'children'),
-        #     Output('list of correlation2', 'children'),
-        #     Output('list of correlation3', 'children')],
-        #     [Input('threshold_chi2', 'value'),
-        #     Input('minimum_elements', 'value'),
-        #     Input('chi2_label', 'value')]
-        # )(self.display_list_chi2_correlation)
+        self.app.callback(
+            [Output('list of correlation1', 'children'),
+            Output('list of correlation2', 'children'),
+            Output('list of correlation3', 'children')],
+            [Input('threshold_chi2', 'value'),
+            Input('minimum_elements', 'value'),
+            Input('chi2_label', 'value')]
+        )(self.display_list_chi2_correlation)
     
         # Intro MCA
         self.app.callback(
