@@ -47,14 +47,6 @@ the interactivity of the Dash application which is the main goal of the project.
 
 - process the df for the visualization and for the ML
 
-- accentuate the separation of the ML general parameters from the rest of the code
-
-- Use classes instead of inline css
-
-- Set a max width for decision tree png
-
-- Re do all the css ...
-
 - re-do the best param of RF
 
 - Re-do the comments of the grap pat 3D
