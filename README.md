@@ -30,6 +30,12 @@ You can see the illustrations of the application in the folder application/illus
 
 ![plot](./application/illustrations/acm_modalities.png)
 
+![plot](./application/illustrations/acm_patients_3D.png)
+
+![plot](./application/illustrations/image_decision_tree.png)
+
+![plot](./application/illustrations/random_forest.png)
+
 # TODO
 
 - Refactor the functions, comments, process 
