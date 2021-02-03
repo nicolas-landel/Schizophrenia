@@ -26,14 +26,19 @@ Then you can check the local address http://localhost:8000
 
 # Illustration of the application functionalities
 
-You can see the illustrations of the application in the folder application/illustration.
+These images represent an overview of the dash application. Unfortunatly, this does not reflect
+the interactivity of the Dash application which is the main goal of the project.
 
+### Modalities graph after the MCA
 ![plot](./application/illustrations/acm_modalities.png)
 
+### Patients graph after the MCA
 ![plot](./application/illustrations/acm_patients_3D.png)
 
+### Decision tree
 ![plot](./application/illustrations/image_decision_tree.png)
 
+### Random forest
 ![plot](./application/illustrations/random_forest.png)
 
 # TODO
