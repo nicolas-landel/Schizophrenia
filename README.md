@@ -29,10 +29,10 @@ Then you can check the local address http://localhost:8000
 These images represent an overview of the dash application. Unfortunatly, this does not reflect
 the interactivity of the Dash application which is the main goal of the project.
 
-### Modalities graph after the MCA
+### Modality graph after the MCA
 ![plot](./application/illustrations/acm_modalities.png)
 
-### Patients graph after the MCA
+### Patient graph after the MCA
 ![plot](./application/illustrations/acm_patients_3D.png)
 
 ### Decision tree
