@@ -429,10 +429,13 @@ class GenerateApp():
                         ]
                     ),
                     html.Div(id="all the ml",
+                        className="new-section",
                         children=[
+                            html.H2(children="Machine learning"),
                             html.Div(id="Data preparation",
                                 children=[
-                                    html.P(children='Quel référentiel de temps voulez vous choisir pour le diagnostic du patient ?'),
+                                    html.H3(children="Preprocessing"),
+                                    html.P(children='Quel référentiel de temps voulez vous choisir pour le diagnostic du patient ?', className="question"),
                                     dcc.RadioItems(
                                         id='choose_period_decision_tree',
                                         options=[
@@ -446,7 +449,7 @@ class GenerateApp():
                                         labelStyle={'display' : 'inline-block'}
                                     ),
                                     html.P(children="Choississez le pourcentage des données utilisées pour tester l'arbre de décision. \
-                                                    Le reste des données sera utilisé pour entrainer l'arbre "
+                                                    Le reste des données sera utilisé pour entrainer l'arbre ", className="question"
                                     ),
                                     dcc.RadioItems(
                                         id='split_size',
@@ -459,7 +462,7 @@ class GenerateApp():
                                         value=0.3,
                                         labelStyle={'display' : 'inline-block'}
                                     ),
-                                    html.P(children="Voulez-vous garder les patients atteints de psychose de l'étude ?"),
+                                    html.P(children="Voulez-vous garder les patients atteints de psychose de l'étude ?", className="question"),
                                     dcc.RadioItems(
                                         id='keep_psychose',
                                         options=[
@@ -469,7 +472,7 @@ class GenerateApp():
                                         value=1,
                                         labelStyle={'display': 'inline-block'}
                                     ),
-                                    html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?'),  
+                                    html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?', className="question"),  
                                     dcc.RadioItems(
                                         id="keep_patient_aside",
                                         options=[
@@ -481,7 +484,7 @@ class GenerateApp():
                                     ),
                                     html.Div(id="display_patient_to_choose",
                                         children=[
-                                            html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe"),
+                                            html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe", className="question"),
                                             dcc.Dropdown(
                                                 id='patients_to_evaluate',
                                                 options=[{'label':i, 'value':i} for i in (self.df_data_disj.index.to_list())],
@@ -494,42 +497,40 @@ class GenerateApp():
                                 ]
                             ),
                             html.Div(id="all of the decision tree",
+                                className="new-section",
                                 children=[
                                     html.Div(id="all the parameters of the tree",
                                         children=[
                                             html.H2(
-                                                children="Arbre de décision",
-                                                style={"font-family": "Open Sans", "margin-left":"38%"}
+                                                children="Modèle de ML : arbre de décision"
                                             ),
-                                            
                                             html.Div(id="div for the parameters of the tree",
                                                 children=[
-                                                    html.Div(
-                                                        style = {
-                                                            "display":"grid", "grid-template-columns": "auto auto auto auto auto auto",
-                                                                "grid-gap": "8px","grid-column-gap": "3%", "white-space":"pre"
-                                                        },
-                                                        children=[
-                                                            html.P(children='Les paramètres de l\'arbre permettant d\'avoir le meilleur score de la mesure suivante sont :'),
-                                                            dcc.RadioItems(
-                                                                id="scoring_best_para",
-                                                                options=[
-                                                                    {'label': 'accuracy', 'value': 'accuracy'},
-                                                                    {'label':'f1_macro', 'value': 'f1_macro'}
-                                                                ],
-                                                                value ="accuracy",
-                                                                labelStyle={'display' : 'inline-block'}
-                                                            )
-                                                        ]
+                                                    html.H4(children="Calcul des meilleurs paramètres"),
+                                                    html.P(children="Choissez la métrique pour calculer les meilleurs paramètres",
+                                                        className="question"
+                                                    ),
+                                                    dcc.RadioItems(
+                                                        id="scoring_best_para",
+                                                        options=[
+                                                            {'label': 'accuracy', 'value': 'accuracy'},
+                                                            {'label':'f1_macro', 'value': 'f1_macro'}
+                                                        ],
+                                                        value ="accuracy",
+                                                        labelStyle={'display' : 'inline-block'}
+                                                    ),
+
+                                                    html.P(children="Les paramètres meilleurs paramètres pour l'arbre de décision sont :",
+                                                        className="answers"
                                                     ),
                                                     html.P(id='best_para_tree'),
-                                                    html.H5(
-                                                        children="Vous pouvez régler les paramètres de l'arbre ci-dessous :",
-                                                        style={'margin-top':'25px'}
+
+                                                    html.H4(
+                                                        children="Paramétrage du modèle",
                                                     ),  
                                                     html.P(
                                                         children="Profondeur maximale de l'arbre :",
-                                                        style={'margin-top':'8px'}
+                                                        className="question"
                                                     ),
                                                     dcc.RadioItems(
                                                         id='depth_',
@@ -537,7 +538,7 @@ class GenerateApp():
                                                         value=3,
                                                         labelStyle={"display":"inline-block"}
                                                     ),
-                                                    html.P(children="Poids des classes :", style={'margin-top':'12px'}),
+                                                    html.P(children="Poids des classes :", className="question"),
                                                     html.Div(
                                                         id="div_weight_with_psychose",
                                                         children=[
@@ -571,7 +572,7 @@ class GenerateApp():
                                                     ),
                                                     html.P(
                                                         children="Nombre minimal de patients requis à chaque noeud :",
-                                                        style={"margin-top":"12px"}
+                                                        className="question"
                                                     ),
                                                     dcc.Slider(
                                                         id='min_split_',
@@ -581,7 +582,7 @@ class GenerateApp():
                                                         value=5
                                                     ),
                                                     html.P(children="Nombre minimal de patients requis à chaque feuille :",
-                                                        style={"margin-top":"12px"}
+                                                        className="question"
                                                     ),
                                                     dcc.Slider(
                                                         id='min_leaf_',
@@ -591,7 +592,7 @@ class GenerateApp():
                                                         value=2
                                                     ),
                                                     html.P(children="Variable(s) à ne pas prendre en compte pour l'arbre :",
-                                                        style={'margin-top':'12px'}
+                                                        className="question"
                                                     ),
                                                     dcc.Dropdown(
                                                         id='delete_col',
@@ -603,35 +604,39 @@ class GenerateApp():
                                             )    
                                         ]
                                     ),
-                                    html.Img(id='decision tree', style={"margin-bottom":"20px", "margin-top":"20px"}),
+                                    html.H4(children="Arbre de décision"),
+                                    html.Div(className="center-img",
+                                        children=[
+                                            html.Img(id='decision tree', className="decision-tree")
+                                        ]
+                                    ),
                                     html.P(
-                                        id="explication_arbre", children="L'arbre de décision essaie de séparer les différentes classes 'pas de risque', \
+                                        id="explication_arbre", className="explanation",
+                                        children="L'arbre de décision essaie de séparer les différentes classes 'pas de risque', \
                                             'a risque' et 'psychose' à chaque noeud. L'objectif est de trouver des combinaisons de variables permettant d'avoir des feuilles \
                                             les plus pures possible, c'est à dire ayant uniquement des patients de la même classe. "
                                     ),
                                     html.Div(id='analysis prediction tree',
                                         children=[
-                                            html.H2(children="Etude de l'arbre de décision : test de prédiction "),
+                                            html.H4(children="Etude de l'arbre de décision"),
                                             html.H5(id="confusion matrix title", children="Matrice de confusion de l'arbre de décision"),
                                             html.P(id="explication_tree", children="Les lignes de la matrice de confusion représentent les classes\
                                                 de l'étude et la somme de chaque ligne le nombre d'éléments pour la classe. \
                                                 Les colonnes représentent les classes prédites. Idéalement, tous les éléments se retrouvent sur la \
-                                                diagonales : ils ont été prédits dans leur classe.", style={"margin-bottom":"20px"}
+                                                diagonales : ils ont été prédits dans leur classe.", className="explanation"
                                             ),
                                             html.Div(id="confusion matrix",
-                                                style={"display":"grid", "margin-right":"70%","font-size":"20px",
-                                                    "text-align-last": "right","white-space":"pre"},
+                                                className="confusion-matrix-tree",
                                                 children=[
-                                                    html.P(id="column", children=["Prédictions"]),
-                                                    html.P(id="confu_matrix_1"),
-                                                    html.P(id="confu_matrix_2"),
-                                                    html.P(id="confu_matrix_3")
+                                                    html.Div(id="column", children=["Prédictions"]),
+                                                    html.Div(id="confu_matrix_1"),
+                                                    html.Div(id="confu_matrix_2"),
+                                                    html.Div(id="confu_matrix_3")
                                                 ]
                                             ),
                                             html.Div(id="classi_report",
                                                 children=[
                                                     html.H5(id="classifiaction report title", children="Analyse des résultats de la prédiction"),
-                                                    html.P(id="explication_classi", children=" explication"),
                                                     html.Div(id="classification report",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                                 "text-align-last": "right","white-space":"pre"},
@@ -652,8 +657,7 @@ class GenerateApp():
                                             ),
                                             html.Div(id="multilabel_confusion_matrix",
                                                 children=[
-                                                    html.H5(id="mutlilabel title", children="Matrice de confusion pour chaque classe"),
-                                                    html.P(id="explication_multilab", children=" La matrice de confusion est calculée pour chaque classe."),
+                                                    html.H5(id="mutlilabel title", children="Matrice de confusion pour chaque classe :"),
                                                     html.Div(id="mutlilabel_confu_mat",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                                 "text-align-last": "right","white-space":"pre"
@@ -671,19 +675,26 @@ class GenerateApp():
                                                         ]
                                                     ),
                                                 ]
+                                            ),
+                                            html.P(className="explanation",
+                                                children="Nous réalisons ici la matrice de confusion pour chaque classe, indépendamment des autres. C'est à dire que nous testons si le patient appartient ou non à la classe. \
+                                                    Nous avons horizontalement, sur la première ligne les patients qui n'appartiennent pas à la classe en question et sur la seconde ligne, les patients qui appartiennet à la classe. \
+                                                    Verticalement, nous avons les prédictions. Dans la première colonne, on a les patients qui n'ont pas été prédits comme appartenant à la classe et dans la seconde colonne ceux ayant \
+                                                    été prédits comme appartenant à la classe. On voit donc que plus le modèle est performant, plus il y a de patients sur la diagonale, la première case \
+                                                    représentant les vrais négatifs et celle en bas à droite les vrais positifs."
                                             )
                                         ]
                                     )
-                                ],
-                                style={"margin-top":"20px","border-top": "2px solid black"}
+                                ]
                             ),
                             html.Div(id="all of the random forest", 
-                                style={"border-top": "2px solid black"},
+                                className="new-section",
                                 children=[
                                     html.Div(id="preprocessing and explanation of random forest",
                                         children=[
-                                            html.H2(children="Random forest", style={"font-family": "Open Sans", "margin-left":"38%", "margin-top":"20px"}),
-                                            html.P(id="explication_rf_all", 
+                                            html.H2(children="Random forest"),
+                                            html.P(id="explication_rf_all",
+                                                className="explanation",
                                                 children=" La forêt aléatoire est une technique d'apprentissage supervisé \
                                                     basée sur l'utilisation de nombreux arbres de décision. Chaque arbre prend seulement une partie des données \
                                                     pour s'entrainer, différente entre chaque arbre. L'autre partie de données est utilisée pour le tester. Ainsi, \

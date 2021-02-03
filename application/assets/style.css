@@ -104,7 +104,6 @@ td {
     padding: 5px;
 }
 
-/* style={"display":"grid", "grid-template-columns": "auto auto", "grid-gap": "8px", "grid-column-gap": "3%", "white-space":"pre"}, */
 /* button */
 
 button {
@@ -122,6 +121,26 @@ button {
 button:hover {
     background-color: #44416e;
     cursor: pointer;
+}
+
+/* decision tree */
+
+.decision-tree {
+    max-width: 97%;
+}
+
+.center-img {
+    text-align: center;
+    padding: 10px;
+}
+
+.confusion-matrix-tree {
+    display: grid; 
+    margin-right: 70%;
+    text-align-last: right;
+    white-space: pre;
+    padding: 40px;
+    line-height: 40px;
 }
 
 /* margins, paddings, etc */
