@@ -1,7 +1,9 @@
 # Schizophrenia
 
 This project uses medical data confidential so not available in this repository.
-The aim is to show the code structure and in addition for medical teams providing data respecting the format, to launch the web application.
+The aim is to show the code structure and in addition for medical teams providing data respecting the format, to launch the web application. 
+
+The current available language is French.
 
 ## Needs
 
@@ -22,19 +24,28 @@ If you have already done this command and built the images, just write:
 
 Then you can check the local address http://localhost:8000
 
+# Illustration of the application functionalities
+
+These images represent an overview of the dash application. Unfortunatly, this does not reflect
+the interactivity of the Dash application which is the main goal of the project.
+
+### Modality graph after the MCA
+![plot](./application/illustrations/acm_modalities.png)
+
+### Patient graph after the MCA
+![plot](./application/illustrations/acm_patients_3D.png)
+
+### Decision tree
+![plot](./application/illustrations/image_decision_tree.png)
+
+### Random forest
+![plot](./application/illustrations/random_forest.png)
+
 # TODO
 
 - Refactor the functions, comments, process 
 
 - process the df for the visualization and for the ML
-
-- accentuate the separation of the ML general parameters from the rest of the code
-
-- Use classes instead of inline css
-
-- Set a max width for decision tree png
-
-- Re do all the css ...
 
 - re-do the best param of RF
 

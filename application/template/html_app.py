@@ -49,22 +49,23 @@ class GenerateApp():
         self.html = [
             html.H1(className="app-title", children='Prévention en santé mentale'),
             html.Div(id="all-the-data",
+                className="all-the-data",
                 children=[ 
                     html.Div(id='param-global-var',
                         children=[
-                            html.H4(
-                                 className="margin-bot-8", 
+                            html.H2(
                                 children="Paramètres de l'application"
                             ),
-                            html.P(children="Veuillez choisir le nom du fichier csv dans le répertoir courant"),
+                            html.P(children="Veuillez choisir le nom du fichier csv dans le répertoir courant :", className="question"),
                             dcc.Input(
                                 id='name_file',
                                 value='raw_data.csv',
                                 type='text'
                             ),
-                            html.P(children="Voulez-vous conserver les patients perdus de vue au cours de l'étude \
+                            html.P(className="question",
+                                children="Voulez-vous conserver les patients perdus de vue au cours de l'étude \
                                 (après avoir au moins effectués la première consultation) en les \
-                                considérant avec le même diagnostic qu'à leur dernière consultation ou les enlever de l'étude ?"
+                                considérant avec le même diagnostic qu'à leur dernière consultation ou les enlever de l'étude ?",
                             ),
                             dcc.RadioItems(
                                 id='option_lost',
@@ -72,7 +73,8 @@ class GenerateApp():
                                     {'label':'garder les patients perdu de vue', 'value':2},
                                     {'label':'retirer les patients perdus de vue ', 'value':3}],
                                 value=2,
-                                labelStyle={'display': 'inline-block'}
+                                labelStyle={'display': 'inline-block'},
+                                className="answers"
                             ),
                             html.P(
                                 className="hidden-div",
@@ -81,16 +83,18 @@ class GenerateApp():
                         ]
                     ),
                     html.Div(id="test chi2",
+                        className="new-section",
                         children=[
-                            html.H2(className="h2-chi2", children="Test du chi2"),
-                            html.H6(
-                                className="h6-chi2",
+                            html.H2(children="Test du chi2"),
+                            html.P(
+                                className="explanation",
                                 children="Le test du chi2 permet de savoir si deux variables qualitatives sont indépendantes ou non, c'est à dire si les réponses de l'une dépendent de l'autre.\
                                         On formule l'hypothèse H0 : il y a indépendance entre les 2 variables. On fixe un seuil de confiance, habituellement 0.05.\
                                         Les variables qui sont affichées ci-dessous ont toutes une hypothèse H0 rejetée. Elles ne sont donc pas indépendantes.",
                             ),
-                            html.H6(children="Veuillez choisir un seuil de confiance et le nombre minimal d'éléments \
-                            qu'il doit y avoir dans la plus petite des modalités (pour les variables catégorielles de type 'oui/non') :"
+                            html.P(className="question",
+                                children="Veuillez choisir un seuil de confiance et le nombre minimal d'éléments \
+                                qu'il doit y avoir dans la plus petite des modalités (pour les variables catégorielles de type 'oui/non') :"
                             ),
                             dcc.Input(
                                 id="threshold_chi2",
@@ -102,7 +106,8 @@ class GenerateApp():
                                 value="5", 
                                 type="text"
                             ),
-                            html.H6(children="Voulez-vous faire le test du khi2 uniquement entre les variables et le label ?"),
+                            html.P(className="question",
+                                children="Voulez-vous faire le test du khi2 uniquement entre les variables et le label ?"),
                             dcc.RadioItems(
                                 id="chi2_label",
                                 options=[
@@ -112,16 +117,15 @@ class GenerateApp():
                                 value=0,
                                 labelStyle={'display': 'inline-block'}
                             ),
-                            html.H6(
+                            html.P(
                                 id="explication-chi2", 
-                                className="margin-20", 
+                                className="explanation", 
                                 children="Voici ci dessous la liste des variables qui sont \
                                     associées entre elles (2 par 2). On ne peut cependant pas savoir dans quel sens varie cette dépendance."
                             ),
                             html.Div(
                                 id='resultat chi2', 
-                                style={"display":"grid", "grid-template-columns": "auto auto auto", 'column-fill':'auto',"grid-gap": "8px",
-                                        "grid-column-gap": "3%", "white-space":"pre"},
+                                className="results-chi2",
                                 children=[
                                     html.P(id="list of correlation1"),
                                     html.P(id="list of correlation2"),
@@ -129,15 +133,12 @@ class GenerateApp():
                                 ]
                             )           
                         ],
-                        style={"margin-bottom":"25px"}
                     ),
                     html.Div(id="all the ACM",
+                        className="new-section",
                         children=[
-                            html.H2(
-                                children="Analyse des correspondances multiples",
-                                style={"font-family": "Open Sans", "margin-left":"35%"}
-                            ),
-                            html.P(children="Effectif d'une modalité "),
+                            html.H2(children="Analyse des correspondances multiples"),
+                            html.P(children="Effectif d'une modalité", className="question"),
                             dcc.Dropdown(
                                 id="effective_modality",
                                 options=[{'label':str(i) ,'value': str(i)} for i in self.df_data_disj.columns],
@@ -147,82 +148,76 @@ class GenerateApp():
 
                             html.Div(id="1er graphe ACM",
                                 children=[
-                                    html.H3(children="Graphe des coordonnées des modalités sur le plan de facteurs de l'ACM ",
-                                        style={"align-items":"center"}
-                                    ),
+                                    html.H3(children="Graphe des coordonnées des modalités sur le plan de facteurs de l'ACM "),
 
                                     html.Div(id = 'graph_var_by_var',
                                         children=[
-                                            html.H6(children='Quel référentiel de temps voulez vous choisir pour le label ?'),
-                                                dcc.RadioItems(
-                                                    id='choose_period_graph',
-                                                    options=[
-                                                        {'label':'M0', 'value':0},
-                                                        {'label':'M6', 'value':1},
-                                                        {'label':'M12', 'value':2},
-                                                        {'label':'M18', 'value':3},
-                                                        {'label':'M24', 'value':4}
-                                                    ],
-                                                    value=0,
-                                                    labelStyle={'display' : 'inline-block'}
-                                                ),
-
-                                                html.H6(children="Choisissez le facteur pour l'axe des abscisses"),
-
-                                                dcc.RadioItems(
-                                                    id='fs_id1_',
-                                                    options=[{'label': i, 'value': i} for i in range(1,11)],
-                                                    value=1,
-                                                    labelStyle={'display': 'inline-block'}
-                                                ),
-
-                                                html.H6(children="Choisissez le facteur pour l'axe des ordonnées"),
-
-                                                dcc.RadioItems(
-                                                    id='fs_id2_',
-                                                    options=[{'label': i, 'value': i} for i in range(1,11)],
-                                                    value=2,
-                                                    labelStyle={'display': 'inline-block'}
-                                                ),
-                                                
-                                                html.H6(children="Voulez-vous afficher uniquement les modalités significatives ?"),
-                                                dcc.RadioItems(
-                                                    id='significant_only',
-                                                    options=[
-                                                        {'label': "oui", 'value': 1},
-                                                        {'label':"non", 'value': 0}
-                                                    ],
-                                                    value=0,
-                                                    labelStyle={'display': 'inline-block'}
-                                                ),
-                                                html.Button(
-                                                    id='submit-button-state_3', n_clicks=0, children='Afficher le graphe',
-                                                    style={'margin-top':'12px'}
-                                                ),
-                                                dcc.Loading(
-                                                    id="loading-3",
-                                                    type="default",
-                                                    children= dcc.Graph(
-                                                        id='var_by_var', 
-                                                        config ={'autosizable' :True, 'responsive':False},
-                                                        style={"postion":"relative"}
-                                                    )
-                                                )                                             
-                                            ]
-                                        )
+                                            html.P(className="question",
+                                                children='Quel référentiel de temps voulez vous choisir pour le label ?'
+                                            ),
+                                            dcc.RadioItems(
+                                                id='choose_period_graph',
+                                                options=[
+                                                    {'label':'M0', 'value':0},
+                                                    {'label':'M6', 'value':1},
+                                                    {'label':'M12', 'value':2},
+                                                    {'label':'M18', 'value':3},
+                                                    {'label':'M24', 'value':4}
+                                                ],
+                                                value=0,
+                                                labelStyle={'display' : 'inline-block'}
+                                            ),
+                                            html.P(children="Choisissez le facteur pour l'axe des abscisses", className="question"),
+                                            dcc.RadioItems(
+                                                id='fs_id1_',
+                                                options=[{'label': i, 'value': i} for i in range(1,11)],
+                                                value=1,
+                                                labelStyle={'display': 'inline-block'}
+                                            ),
+                                            html.P(children="Choisissez le facteur pour l'axe des ordonnées", className="question"),
+                                            dcc.RadioItems(
+                                                id='fs_id2_',
+                                                options=[{'label': i, 'value': i} for i in range(1,11)],
+                                                value=2,
+                                                labelStyle={'display': 'inline-block'}
+                                            ),
+                                            html.P(children="Voulez-vous afficher uniquement les modalités significatives ?", className="question"),
+                                            dcc.RadioItems(
+                                                id='significant_only',
+                                                options=[
+                                                    {'label': "oui", 'value': 1},
+                                                    {'label':"non", 'value': 0}
+                                                ],
+                                                value=0,
+                                                labelStyle={'display': 'inline-block'}
+                                            ),
+                                            html.Button(
+                                                id='submit-button-state_3', n_clicks=0, children='Afficher le graphe'
+                                            ),
+                                            dcc.Loading(
+                                                id="loading-3",
+                                                type="default",
+                                                children= dcc.Graph(
+                                                    id='var_by_var', 
+                                                    config ={'autosizable' :True, 'responsive':False},
+                                                    style={"postion":"relative"}
+                                                )
+                                            )                                             
+                                        ]
+                                    )
                                 ]
                             ),
                             html.Div(id="explanation graphe modalities",
                                 children=[
                                     html.H4(children="Analyse des coordonées des modalités du graphe"),
                                     html.Div(id="hidden_div4", style={"display":"none"}),
-                                    html.P(children="Veuillez choisir une modalité dont on cherchera les modalités proches dans le graphe"),
+                                    html.P(children="Veuillez choisir une modalité dont on cherchera les modalités proches dans le graphe", className="question"),
 
                                     dcc.Dropdown(
                                         id="modality_to_evaluate",
                                         value=('label','psychose') #value by default
                                     ),
-                                    html.P(children="Veuillez choisir la distance euclidienne maximum avec les autres modalités"),
+                                    html.P(className="question", children="Veuillez choisir la distance euclidienne maximum avec les autres modalités"),
 
                                     dcc.Slider(
                                         id='dist_moda',
@@ -236,18 +231,18 @@ class GenerateApp():
                                     dcc.Loading(
                                         id="loading-4",
                                         type="default",
-                                        children= html.P(
-                                            id='array_graph_moda', 
-                                            style={'margin-top':'20px','margin-bottom':'20px','margin-left':'420px'}
+                                        className="margin-30",
+                                        children= html.Div(
+                                            className="array",
+                                            id='array_graph_moda'
                                         )
                                     )
                                 ]
                             ),
                             html.Div(id='analysis factors',
-                                style ={'margin-bottom':'20px'},
                                 children=[
-                                    html.H3(children="Analyse d'un facteur"),
-                                    html.P(children='Choisissez le facteur que vous vouler étudier'),
+                                    html.H4(children="Analyse d'un facteur"),
+                                    html.P(children='Choisissez le facteur que vous vouler étudier', className="question"),
                                     dcc.RadioItems(
                                         id='factor_to_analyse',
                                         options=[{'label': i, 'value': i} for i in range(1,11)],
@@ -256,51 +251,49 @@ class GenerateApp():
                                     ),
                                     html.Div(
                                         id="arrays analys factor",
-                                        style={"display":"grid", "grid-template-columns": "auto auto", "grid-gap": "8px", "grid-column-gap": "3%", "white-space":"pre"},
+                                        className="array array-grid",
                                         children=[
-                                            html.P(
+                                            html.Div(
                                                 id='modalities_coordo_negative_1', 
-                                                style={'margin-left':'auto', 'margin-right':'auto'}
                                             ),
-                                            html.P(
+                                            html.Div(
                                                 id='modalities_coordo_positive_1',
-                                                style={'margin-left':'auto', 'margin-right':'auto'}
-                                            )     
+                                            ),
+                                            html.Div(
+                                                id='modalities_contribution_1', 
+                                            ),     
                                         ]
                                     ),
-                                    html.P(
-                                        id='modalities_contribution_1', 
-                                        style={'margin-top':'20px','margin-bottom':'20px', 'margin-left':'420px'}
-                                    ),
+                                    
                                     html.P(
                                         id='sentence_negative',
-                                        style={'margin-bottom':'18px'}
+                                        className="answers"
                                     ),
                                     html.P(
                                         id='sentence_positive',
-                                        style={'margin-bottom':'18px'}
+                                        className="answers"
                                     ),
                                     html.Div(
                                         id='graph_patient_feature',
                                         children=[
-                                            html.H3(
+                                            html.H4(
                                                 children="Graphe des coordonnées des patients dans le plan des facteurs de l'ACM selon la variable"
                                             ),
-                                            html.P(children='Choisissez le facteur pour l\'axe des abscisses'),
+                                            html.P(children='Choisissez le facteur pour l\'axe des abscisses', className="question"),
                                             dcc.RadioItems(
                                                 id='factor_abs_graphe_pat_var',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=1,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.P(children='Choisissez le facteur pour l\'axe des ordonnées'),
+                                            html.P(children='Choisissez le facteur pour l\'axe des ordonnées', className="question"),
                                             dcc.RadioItems(
                                                 id='factor_ordo_graphe_pat_var',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=2,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.P(children="Choisissez une variable"),
+                                            html.P(children="Choisissez une variable", className="question"),
                                             dcc.Dropdown(
                                                 id="choose_feature",
                                                 options=[{'label':str(i) ,'value':str(i)} for i in self.df_data.columns],
@@ -317,21 +310,21 @@ class GenerateApp():
                                     html.Div(
                                         id = 'graph_patients',
                                         children=[
-                                            html.H6(children="Choisissez le facteur pour l'axe des abscisses"),
+                                            html.P(children="Choisissez le facteur pour l'axe des abscisses", className="question"),
                                             dcc.RadioItems(
                                                 id='fs_id1_p',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=1,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.H6(children="Choisissez le facteur pour l'axe des ordonnées"),
+                                            html.P(children="Choisissez le facteur pour l'axe des ordonnées", className="question"),
                                             dcc.RadioItems(
                                                 id='fs_id2_p',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=2,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.H6(children="Classe des patients"),
+                                            html.P(children="Classe des patients", className="question"),
                                             dcc.Checklist(
                                                 id='class_patient_2D',
                                                 options=[
@@ -342,7 +335,7 @@ class GenerateApp():
                                                 value=[1,3,5],
                                                 labelStyle={'display':'inline-block'}
                                             ),
-                                            html.H6(children="Choississez les patients que vous voulez afficher"),
+                                            html.P(children="Choississez les patients que vous voulez afficher", className="question"),
                                             dcc.Dropdown(
                                                 id='choose_pat_2d',
                                                 options=[{'label':i, 'value':i} for i in range (self.table_patients_mca.shape[1])],
@@ -353,13 +346,15 @@ class GenerateApp():
                                                 id='submit-button-state_1', 
                                                 n_clicks=0, 
                                                 children='Afficher le graphe',
-                                                style={'margin-top':'12px'}
+                                                style={'margin-top':'40px'}
                                             ),
                                             html.Hr(),
                                             dcc.Loading(
                                                 id="loading-1",
                                                 type="default",
-                                                children=dcc.Graph(id='patients_2d', config ={'autosizable' :True, 'responsive':False})
+                                                children=dcc.Graph(id='patients_2d',
+                                                    config ={'autosizable' :True, 'responsive':False},
+                                                    className="margin-30")
                                             )
                                         ]
 
@@ -372,28 +367,28 @@ class GenerateApp():
                                     html.Div(
                                         id='graph3D_patients',
                                         children=[
-                                            html.H6(children="Choisissez le facteur pour l'axe des abscisses"),
+                                            html.P(children="Choisissez le facteur pour l'axe des abscisses", className="question"),
                                             dcc.RadioItems(
                                                 id='fs_id1_p_3D',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=1,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.H6(children="Choisissez le facteur pour l'axe des ordonnées'"),
+                                            html.P(children="Choisissez le facteur pour l'axe des ordonnées'", className="question"),
                                             dcc.RadioItems(
                                                 id='fs_id2_p_3D',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=2,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.H6(children="Choisissez le facteur pour l'axe z"),
+                                            html.P(children="Choisissez le facteur pour l'axe z", className="question"),
                                             dcc.RadioItems(
                                                 id='fs_id3_p_3D',
                                                 options=[{'label': i, 'value': i} for i in range(1,11)],
                                                 value=3,
                                                 labelStyle={'display': 'inline-block'}
                                             ),
-                                            html.H6(children="Classe des patients"),
+                                            html.P(children="Classe des patients", className="question"),
                                             dcc.Checklist(
                                                 id='class_patient_3D',
                                                 options=[
@@ -413,31 +408,34 @@ class GenerateApp():
                                                 id='submit-button-state_2', 
                                                 n_clicks=0, 
                                                 children='Afficher le graphe',
-                                                style={'margin-top':'12px'}
+                                                style={'margin-top':'40px'}
                                             ),
                                             html.Hr(),
                                             dcc.Loading(
                                                 id="loading-2",
                                                 type="default",
-                                                children=dcc.Graph(id='patients_3D', config ={'autosizable' :True, 'responsive':False})
+                                                children=dcc.Graph(id='patients_3D',
+                                                    config ={'autosizable' :True, 'responsive':False},
+                                                    className="margin-30")
                                             ),
                                             html.P(children="Si le patients a une coordonnée positive selon le facteur en abscisse, il aura tendance à avoir : "),
                                             html.P(id='contributions_fs_x'),
                                             html.P(children="Si le patients a une coordonnée négative selon le facteur en abscisse, il aura tendance à avoir : "),
                                             html.P(id='contributions_fs_x_')    
                                         ]
-
                                     )
                                 ]
                             )
-                        ],
-                        style={"border-top": "2px solid black", "margin-top":"10px"}
+                        ]
                     ),
                     html.Div(id="all the ml",
+                        className="new-section",
                         children=[
+                            html.H2(children="Machine learning"),
                             html.Div(id="Data preparation",
                                 children=[
-                                    html.P(children='Quel référentiel de temps voulez vous choisir pour le diagnostic du patient ?'),
+                                    html.H3(children="Preprocessing"),
+                                    html.P(children='Quel référentiel de temps voulez vous choisir pour le diagnostic du patient ?', className="question"),
                                     dcc.RadioItems(
                                         id='choose_period_decision_tree',
                                         options=[
@@ -451,7 +449,7 @@ class GenerateApp():
                                         labelStyle={'display' : 'inline-block'}
                                     ),
                                     html.P(children="Choississez le pourcentage des données utilisées pour tester l'arbre de décision. \
-                                                    Le reste des données sera utilisé pour entrainer l'arbre "
+                                                    Le reste des données sera utilisé pour entrainer l'arbre ", className="question"
                                     ),
                                     dcc.RadioItems(
                                         id='split_size',
@@ -464,7 +462,7 @@ class GenerateApp():
                                         value=0.3,
                                         labelStyle={'display' : 'inline-block'}
                                     ),
-                                    html.P(children="Voulez-vous garder les patients atteints de psychose de l'étude ?"),
+                                    html.P(children="Voulez-vous garder les patients atteints de psychose de l'étude ?", className="question"),
                                     dcc.RadioItems(
                                         id='keep_psychose',
                                         options=[
@@ -474,7 +472,7 @@ class GenerateApp():
                                         value=1,
                                         labelStyle={'display': 'inline-block'}
                                     ),
-                                    html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?'),  
+                                    html.P('Voulez-vous mettre un patient de côté pour faire une prédiction de sa classe ?', className="question"),  
                                     dcc.RadioItems(
                                         id="keep_patient_aside",
                                         options=[
@@ -486,7 +484,7 @@ class GenerateApp():
                                     ),
                                     html.Div(id="display_patient_to_choose",
                                         children=[
-                                            html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe"),
+                                            html.P("Choisissez le patient que vous voulez mettre de côté pour ensuite prédire sa classe", className="question"),
                                             dcc.Dropdown(
                                                 id='patients_to_evaluate',
                                                 options=[{'label':i, 'value':i} for i in (self.df_data_disj.index.to_list())],
@@ -499,42 +497,40 @@ class GenerateApp():
                                 ]
                             ),
                             html.Div(id="all of the decision tree",
+                                className="new-section",
                                 children=[
                                     html.Div(id="all the parameters of the tree",
                                         children=[
                                             html.H2(
-                                                children="Arbre de décision",
-                                                style={"font-family": "Open Sans", "margin-left":"38%"}
+                                                children="Modèle de ML : arbre de décision"
                                             ),
-                                            
                                             html.Div(id="div for the parameters of the tree",
                                                 children=[
-                                                    html.Div(
-                                                        style = {
-                                                            "display":"grid", "grid-template-columns": "auto auto auto auto auto auto",
-                                                                "grid-gap": "8px","grid-column-gap": "3%", "white-space":"pre"
-                                                        },
-                                                        children=[
-                                                            html.P(children='Les paramètres de l\'arbre permettant d\'avoir le meilleur score de la mesure suivante sont :'),
-                                                            dcc.RadioItems(
-                                                                id="scoring_best_para",
-                                                                options=[
-                                                                    {'label': 'accuracy', 'value': 'accuracy'},
-                                                                    {'label':'f1_macro', 'value': 'f1_macro'}
-                                                                ],
-                                                                value ="accuracy",
-                                                                labelStyle={'display' : 'inline-block'}
-                                                            )
-                                                        ]
+                                                    html.H4(children="Calcul des meilleurs paramètres"),
+                                                    html.P(children="Choissez la métrique pour calculer les meilleurs paramètres",
+                                                        className="question"
+                                                    ),
+                                                    dcc.RadioItems(
+                                                        id="scoring_best_para",
+                                                        options=[
+                                                            {'label': 'accuracy', 'value': 'accuracy'},
+                                                            {'label':'f1_macro', 'value': 'f1_macro'}
+                                                        ],
+                                                        value ="accuracy",
+                                                        labelStyle={'display' : 'inline-block'}
+                                                    ),
+
+                                                    html.P(children="Les paramètres meilleurs paramètres pour l'arbre de décision sont :",
+                                                        className="answers"
                                                     ),
                                                     html.P(id='best_para_tree'),
-                                                    html.H5(
-                                                        children="Vous pouvez régler les paramètres de l'arbre ci-dessous :",
-                                                        style={'margin-top':'25px'}
+
+                                                    html.H4(
+                                                        children="Paramétrage du modèle",
                                                     ),  
                                                     html.P(
                                                         children="Profondeur maximale de l'arbre :",
-                                                        style={'margin-top':'8px'}
+                                                        className="question"
                                                     ),
                                                     dcc.RadioItems(
                                                         id='depth_',
@@ -542,7 +538,7 @@ class GenerateApp():
                                                         value=3,
                                                         labelStyle={"display":"inline-block"}
                                                     ),
-                                                    html.P(children="Poids des classes :", style={'margin-top':'12px'}),
+                                                    html.P(children="Poids des classes :", className="question"),
                                                     html.Div(
                                                         id="div_weight_with_psychose",
                                                         children=[
@@ -576,7 +572,7 @@ class GenerateApp():
                                                     ),
                                                     html.P(
                                                         children="Nombre minimal de patients requis à chaque noeud :",
-                                                        style={"margin-top":"12px"}
+                                                        className="question"
                                                     ),
                                                     dcc.Slider(
                                                         id='min_split_',
@@ -586,7 +582,7 @@ class GenerateApp():
                                                         value=5
                                                     ),
                                                     html.P(children="Nombre minimal de patients requis à chaque feuille :",
-                                                        style={"margin-top":"12px"}
+                                                        className="question"
                                                     ),
                                                     dcc.Slider(
                                                         id='min_leaf_',
@@ -596,7 +592,7 @@ class GenerateApp():
                                                         value=2
                                                     ),
                                                     html.P(children="Variable(s) à ne pas prendre en compte pour l'arbre :",
-                                                        style={'margin-top':'12px'}
+                                                        className="question"
                                                     ),
                                                     dcc.Dropdown(
                                                         id='delete_col',
@@ -608,35 +604,39 @@ class GenerateApp():
                                             )    
                                         ]
                                     ),
-                                    html.Img(id='decision tree', style={"margin-bottom":"20px", "margin-top":"20px"}),
+                                    html.H4(children="Arbre de décision"),
+                                    html.Div(className="center-img",
+                                        children=[
+                                            html.Img(id='decision tree', className="decision-tree")
+                                        ]
+                                    ),
                                     html.P(
-                                        id="explication_arbre", children="L'arbre de décision essaie de séparer les différentes classes 'pas de risque', \
+                                        id="explication_arbre", className="explanation",
+                                        children="L'arbre de décision essaie de séparer les différentes classes 'pas de risque', \
                                             'a risque' et 'psychose' à chaque noeud. L'objectif est de trouver des combinaisons de variables permettant d'avoir des feuilles \
                                             les plus pures possible, c'est à dire ayant uniquement des patients de la même classe. "
                                     ),
                                     html.Div(id='analysis prediction tree',
                                         children=[
-                                            html.H2(children="Etude de l'arbre de décision : test de prédiction "),
+                                            html.H4(children="Etude de l'arbre de décision"),
                                             html.H5(id="confusion matrix title", children="Matrice de confusion de l'arbre de décision"),
                                             html.P(id="explication_tree", children="Les lignes de la matrice de confusion représentent les classes\
                                                 de l'étude et la somme de chaque ligne le nombre d'éléments pour la classe. \
                                                 Les colonnes représentent les classes prédites. Idéalement, tous les éléments se retrouvent sur la \
-                                                diagonales : ils ont été prédits dans leur classe.", style={"margin-bottom":"20px"}
+                                                diagonales : ils ont été prédits dans leur classe.", className="explanation"
                                             ),
                                             html.Div(id="confusion matrix",
-                                                style={"display":"grid", "margin-right":"70%","font-size":"20px",
-                                                    "text-align-last": "right","white-space":"pre"},
+                                                className="confusion-matrix",
                                                 children=[
-                                                    html.P(id="column", children=["Prédictions"]),
-                                                    html.P(id="confu_matrix_1"),
-                                                    html.P(id="confu_matrix_2"),
-                                                    html.P(id="confu_matrix_3")
+                                                    html.Div(id="column", children=["Prédictions"]),
+                                                    html.Div(id="confu_matrix_1"),
+                                                    html.Div(id="confu_matrix_2"),
+                                                    html.Div(id="confu_matrix_3")
                                                 ]
                                             ),
                                             html.Div(id="classi_report",
                                                 children=[
                                                     html.H5(id="classifiaction report title", children="Analyse des résultats de la prédiction"),
-                                                    html.P(id="explication_classi", children=" explication"),
                                                     html.Div(id="classification report",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                                 "text-align-last": "right","white-space":"pre"},
@@ -657,8 +657,14 @@ class GenerateApp():
                                             ),
                                             html.Div(id="multilabel_confusion_matrix",
                                                 children=[
-                                                    html.H5(id="mutlilabel title", children="Matrice de confusion pour chaque classe"),
-                                                    html.P(id="explication_multilab", children=" La matrice de confusion est calculée pour chaque classe."),
+                                                    html.H5(id="mutlilabel title", children="Matrice de confusion pour chaque classe :"),
+                                                    html.P(className="explanation",
+                                                        children="Nous réalisons ici la matrice de confusion pour chaque classe, indépendamment des autres. C'est à dire que nous testons si le patient appartient ou non à la classe. \
+                                                            Nous avons horizontalement, sur la première ligne les patients qui n'appartiennent pas à la classe en question et sur la seconde ligne, les patients qui appartiennet à la classe. \
+                                                            Verticalement, nous avons les prédictions. Dans la première colonne, on a les patients qui n'ont pas été prédits comme appartenant à la classe et dans la seconde colonne ceux ayant \
+                                                            été prédits comme appartenant à la classe. On voit donc que plus le modèle est performant, plus il y a de patients sur la diagonale, la première case \
+                                                            représentant les vrais négatifs et celle en bas à droite les vrais positifs."
+                                                    ),
                                                     html.Div(id="mutlilabel_confu_mat",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                                 "text-align-last": "right","white-space":"pre"
@@ -679,16 +685,16 @@ class GenerateApp():
                                             )
                                         ]
                                     )
-                                ],
-                                style={"margin-top":"20px","border-top": "2px solid black"}
+                                ]
                             ),
                             html.Div(id="all of the random forest", 
-                                style={"border-top": "2px solid black"},
+                                className="new-section",
                                 children=[
                                     html.Div(id="preprocessing and explanation of random forest",
                                         children=[
-                                            html.H2(children="Random forest", style={"font-family": "Open Sans", "margin-left":"38%", "margin-top":"20px"}),
-                                            html.P(id="explication_rf_all", 
+                                            html.H2(children="Random forest"),
+                                            html.P(id="explication_rf_all",
+                                                className="explanation",
                                                 children=" La forêt aléatoire est une technique d'apprentissage supervisé \
                                                     basée sur l'utilisation de nombreux arbres de décision. Chaque arbre prend seulement une partie des données \
                                                     pour s'entrainer, différente entre chaque arbre. L'autre partie de données est utilisée pour le tester. Ainsi, \
@@ -700,7 +706,7 @@ class GenerateApp():
                                             html.Div(id="best_param_random_forest", 
                                                 children=[
                                                     html.H4("Calcul des meilleurs paramètres"),   
-                                                    html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):"), 
+                                                    html.P("Sur quel scoring voulez-vous calculer ces paramètres (accuracy, f1_score):", className="question"), 
                                                     dcc.Input(
                                                         id='scoring_best_param_random_forest',
                                                         value='accuracy', 
@@ -714,7 +720,8 @@ class GenerateApp():
                                     ),
                                     html.Div(id="all the parameters of the rf",
                                         children=[
-                                            html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? "),  
+                                            html.H4(children="Paramétrage du modèle"),
+                                            html.P("Voulez-vous choisir les meilleurs paramètres pour la forêt aléatoire ? ", className="question"),  
                                             dcc.RadioItems(
                                                 id="use_best_param",
                                                 options=[
@@ -724,14 +731,14 @@ class GenerateApp():
                                                 value=0,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Profondeur maximale de l'arbre :"),
+                                            html.P("Profondeur maximale de l'arbre :", className="question"),
                                             dcc.RadioItems(
                                                 id='max_depth_rf',
                                                 options=[{'label':i, 'value': i} for i in [2,3,4,'none']],
                                                 value=3,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre d'arbres de décision dans la forêt aléatoire :"),
+                                            html.P("Nombre d'arbres de décision dans la forêt aléatoire :", className="question"),
                                             dcc.RadioItems(
                                                 id='n_estimators',
                                                 options=[
@@ -743,7 +750,7 @@ class GenerateApp():
                                                 value=50,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre maximal de modalités disponibles pour un arbre :"),
+                                            html.P("Nombre maximal de modalités disponibles pour un arbre :", className="question"),
                                             dcc.RadioItems(
                                                 id='max_features_rf',
                                                 options=[
@@ -756,7 +763,7 @@ class GenerateApp():
                                                 value=30,
                                                 labelStyle={"display":"inline-block"}
                                             ),
-                                            html.P("Nombre minimum de patients en sortie de noeud "),
+                                            html.P("Nombre minimum de patients en sortie de noeud ", className="question"),
                                             dcc.Slider(
                                                 id='min_samples_split_rf',
                                                 min=2,
@@ -764,7 +771,7 @@ class GenerateApp():
                                                 marks={i: 'min_split {}'.format(i) for i in range(2,11)},
                                                 value=5
                                             ),
-                                            html.P("Nombre minimum de patients dans une feuille "), 
+                                            html.P("Nombre minimum de patients dans une feuille ", className="question"), 
                                             dcc.Slider(
                                                 id='min_samples_leaf_rf',
                                                 min=1,
@@ -772,7 +779,7 @@ class GenerateApp():
                                                 marks={i: 'min_leaf {}'.format(i) for i in range(1,11)},
                                                 value=5
                                             ),
-                                            html.P("Voulez-vous retirer des variables du modèle ? "), 
+                                            html.P("Voulez-vous retirer des variables du modèle ? ", className="question"), 
                                             dcc.Dropdown(
                                                 id='delete_col_rf',
                                                 options=[{'label': i, 'value': i} for i in self.x_train.columns.get_level_values('features').unique().to_list()],
@@ -783,7 +790,7 @@ class GenerateApp():
                                     ),           
                                     html.Div(id='analysis random forest',
                                         children=[
-                                            html.H2(children="Etude de la forêt aléatoire : test de prédiction ", style={'margin-bottom':"20px"}),
+                                            html.H4(children="Etude de la forêt aléatoire"),
                                             html.H5("Résultats de la prédiction :"),
                                             dcc.Loading(
                                                 id="loading-6",
@@ -791,7 +798,7 @@ class GenerateApp():
                                                 children=html.P(id="results_prediction_rf", style={"margin-bottom":"15px"})
                                             ),
                                             html.H5(id='list_feature_importances_title', children="Importance des variables dans la forêt aléatoire "),
-                                            html.P(id="list_feature_importances"),
+                                            html.Div(id="list_feature_importances", className="rf-feature-importance"),
                                             html.H5(id="confusion matrix rf title", children="Matrice de confusion de la forêt aléatoire"),
                                             html.P(id="explication_rf", 
                                                 children="Les lignes de la matrice de confusion représentent les classes\
@@ -801,8 +808,7 @@ class GenerateApp():
                                                 style={"margin-bottom":"20px"}
                                             ),
                                             html.Div(id="confusion matrix rf",
-                                                style={"display":"grid", "margin-right":"70%","font-size":"20px",
-                                                    "text-align-last": "right","white-space":"pre"},
+                                                className="confusion-matrix",
                                                 children=[
                                                     html.P(id="column_rf", children=["Prédictions"]),
                                                     html.P(id="confu_matrix_rf_1"),
@@ -813,7 +819,6 @@ class GenerateApp():
                                             html.Div(id="classi_report_rf",
                                                 children=[
                                                     html.H5(id="classification report title", children="Analyse de la forêt aléatoire"),
-                                                    html.P(id="explication_classi_rf", children=" explication"),
                                                     html.Div(id="classification report_rf",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                             "text-align-last": "right","white-space":"pre"},
@@ -835,7 +840,6 @@ class GenerateApp():
                                             html.Div(id="multilabel_confusion_matrix_rf",
                                                 children=[
                                                     html.H5(id="mutlilabel title rf", children="Matrice de confusion pour chaque classe"),
-                                                    html.P(id="explication_multilab_rf", children=" La matrice de confusion est calculée pour chaque classe."),
                                                     html.Div(id="mutlilabel_confu_mat_rf",
                                                         style={'display':'grid',"margin-right":"70%","font-size":"15px",
                                                             "text-align-last": "right","white-space":"pre"},
@@ -859,11 +863,6 @@ class GenerateApp():
                         ]
                     )
                 ],
-                style = {"position": "relative", "background-color": "white", "border-radius": "2px 2px 5px 5px",
-                        "font-size": "1.5rem", "box-shadow": "rgb(240, 240, 240) 5px 5px 5px 0px",
-                        "border": "thin solid rgb(240, 240, 240)", "margin-left": "auto","margin-right": "auto","color": "#302F54",
-                        "padding": "8px", "width": "90%", "max-width": "none","box-sizing":"border-box"
-                }
             )   
         ]
 
@@ -877,14 +876,14 @@ class GenerateApp():
         )(self.choose_patients_lost)
 
         # Chi2
-        # self.app.callback(
-        #     [Output('list of correlation1', 'children'),
-        #     Output('list of correlation2', 'children'),
-        #     Output('list of correlation3', 'children')],
-        #     [Input('threshold_chi2', 'value'),
-        #     Input('minimum_elements', 'value'),
-        #     Input('chi2_label', 'value')]
-        # )(self.display_list_chi2_correlation)
+        self.app.callback(
+            [Output('list of correlation1', 'children'),
+            Output('list of correlation2', 'children'),
+            Output('list of correlation3', 'children')],
+            [Input('threshold_chi2', 'value'),
+            Input('minimum_elements', 'value'),
+            Input('chi2_label', 'value')]
+        )(self.display_list_chi2_correlation)
     
         # Intro MCA
         self.app.callback(

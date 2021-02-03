@@ -1,13 +1,160 @@
 .app-title {
-    margin-left: 35%;
+    text-decoration: underline;
+    text-align: center;
+    margin: auto;
     font-size: 50px;
     margin-bottom: 80px;
-    padding-top: 30px;
+    margin-top: 40px;
+    color: #252353
 }
 
-#all-the-data {
+.all-the-data {
     font-family: sans-serif;
+    position: relative;
+    background-color: white;
+    border-radius: 2px 2px 5px 5px;
+    font-size: 1.5rem;
+    box-shadow: rgb(240, 240, 240) 5px 5px 5px 0px;
+    border: thin solid rgb(240, 240, 240);
+    margin-left: auto;
+    margin-right: auto;
+    color: #302F54;
+    padding: 8px;
+    width: 90%;
+    max-width: none;
+    box-sizing:border-box;
 }
+
+/* titles */
+
+h2 {
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 40px;
+    text-align: center;
+    text-decoration: underline;
+    color:  #252353;
+}
+
+h3 {
+    margin-top: 50px;
+    margin-bottom: 30px;
+    color:  #252353;
+    text-decoration: underline;
+}
+
+h4 {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+/* sections */ 
+
+.new-section {
+    border-top: 2px solid black;
+    margin-top: 60px;
+}
+
+
+/* text */
+
+.explanation {
+    font-size: 18px;
+    line-height: 22px;
+}
+
+.question {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.answers {
+    font-size: 20px;
+    display: flex;
+}
+
+label {
+    margin: 10px;
+}
+
+/* array */
+
+.array {
+    text-align: -webkit-center;
+}
+
+.rf-feature-importance {
+    text-align: -webkit-center;
+}
+
+.array-grid {
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 80%;
+}
+
+th {
+    padding-right: 10px;
+    border: 1px black solid;
+}
+
+td {
+    width: 30%;
+    border: 1px black solid;
+    padding: 5px;
+}
+
+/* button */
+
+button {
+    background-color: #252353;
+    color: rgb(224, 221, 214);
+    font-size: 18px;
+    border-radius: 0.35em;
+    border: 1px white solid;
+    padding: 8px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    margin-left: 10px;
+}
+
+button:hover {
+    background-color: #44416e;
+    cursor: pointer;
+}
+
+/* decision tree */
+
+.decision-tree {
+    max-width: 97%;
+}
+
+.center-img {
+    text-align: center;
+    padding: 10px;
+}
+
+.confusion-matrix {
+    display: grid; 
+    margin-right: 70%;
+    text-align-last: right;
+    white-space: pre;
+    padding: 40px;
+    line-height: 40px;
+}
+
+/* margins, paddings, etc */
+
+.margin-30 {
+    margin: 30px;
+}
+
+
+
 
 .margin-bot-8 {
     margin-bottom: 8px
@@ -25,14 +172,11 @@
 
 /*chi2 */
 
-.h2-chi2 {
-    margin-left: 45%;
-    margin-bottom: 8px;
+.results-chi2 {
+    display:grid;
+    grid-template-columns: auto auto auto;
+    column-fill: auto;
+    grid-gap: 8px;
+    grid-column-gap: 3%;
+    white-space: pre;
 }
-
-.h6-chi2 {
-    margin-bottom: 30px;
-    margin-top: 50px;
-}
-
-
