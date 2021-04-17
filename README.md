@@ -1,6 +1,6 @@
 # Schizophrenia
 
-The aim of this project is to develope a Dash application based on docker, containing graphs explaining the data, the results of the ML models and the statistical tests and all modifiable with the dash widgets.
+The aim of this project is to develop a Dash application based on docker, containing graphs explaining the data, the results of the ML models and the statistical tests and all modifiable with the dash widgets.
 
 The current available language is French.
 
