@@ -1,7 +1,6 @@
 # Schizophrenia
 
-This project uses medical data confidential so not available in this repository.
-The aim is to show the code structure and in addition for medical teams providing data respecting the format, to launch the web application. 
+The aim of this project is to develope a Dash application based on docker, containing graphs explaining the data, the results of the ML models and the statistical tests and all modifiable with the dash widgets.
 
 The current available language is French.
 
